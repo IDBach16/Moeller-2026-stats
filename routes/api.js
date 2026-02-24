@@ -1,9 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const { getDb } = require('../lib/db');
+const { getDb, DB_PATH } = require('../lib/db');
 const stats = require('../lib/stats');
 const { broadcast } = require('../lib/sse');
 const { addClient } = require('../lib/sse');
+
+// Database backup download
+router.get('/backup', (req, res) => {
+  const db = getDb();
+  db.pragma('wal_checkpoint(TRUNCATE)');
+  const date = new Date().toISOString().slice(0, 10);
+  res.download(DB_PATH, `moeller_backup_${date}.db`);
+});
 
 // SSE endpoint
 router.get('/events', (req, res) => {
