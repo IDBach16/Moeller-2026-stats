@@ -6,6 +6,7 @@
   <a href="/coach/print?season=regular" class="btn btn-sm <%= season === 'regular' ? 'btn-moeller' : 'btn-outline-secondary' %>">Regular Season</a>
   <a href="/coach/print?season=postseason" class="btn btn-sm <%= season === 'postseason' ? 'btn-moeller' : 'btn-outline-secondary' %>">Postseason</a>
   <button class="btn btn-sm btn-outline-primary ms-auto" onclick="window.print()">Print</button>
+  <button class="btn btn-sm btn-outline-success ms-2" id="downloadPdf">Download PDF</button>
 </div>
 
 <div class="print-page">
@@ -137,4 +138,23 @@
   </table>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
+<script>
+document.getElementById('downloadPdf').addEventListener('click', function() {
+  var btn = this;
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+  var el = document.querySelector('.print-page');
+  html2pdf().set({
+    margin: [0.3, 0.3, 0.3, 0.3],
+    filename: '<%= config.season_year %>_Moeller_Stats_<%= season %>.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
+  }).from(el).save().then(function() {
+    btn.disabled = false;
+    btn.textContent = 'Download PDF';
+  });
+});
+</script>
 <%- include('partials/footer') %>
