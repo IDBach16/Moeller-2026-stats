@@ -263,6 +263,9 @@
           </h2>
           <div id="game-${game.id}" class="accordion-collapse collapse" data-bs-parent="#${accordionId}">
             <div class="accordion-body p-2">
+              <div class="d-flex justify-content-end mb-2">
+                <button class="btn btn-sm btn-outline-danger delete-game-btn" data-game-id="${game.id}" data-game-num="${game.game_number}">Delete Game</button>
+              </div>
               <h6>Hitting</h6>
               <div class="table-responsive">
                 <table class="table table-sm table-striped game-bat-${game.id}">
@@ -358,4 +361,29 @@
   }
 
   connectSSE();
+
+  // Delete game handler
+  document.addEventListener('click', async e => {
+    const btn = e.target.closest('.delete-game-btn');
+    if (!btn) return;
+    const gameId = btn.dataset.gameId;
+    const gameNum = btn.dataset.gameNum;
+    if (!confirm(`Delete Game ${gameNum}? This cannot be undone.`)) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Deleting...';
+    try {
+      const res = await fetch('/api/games/' + gameId, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) { alert(data.error || 'Delete failed'); btn.disabled = false; btn.textContent = 'Delete Game'; return; }
+      // Reload all tabs
+      Object.keys(loaded).forEach(k => { loaded[k] = false; });
+      const activeTab = document.querySelector('#statTabs .nav-link.active');
+      if (activeTab) loadTab(activeTab.dataset.season);
+    } catch (err) {
+      alert('Delete failed: ' + err.message);
+      btn.disabled = false;
+      btn.textContent = 'Delete Game';
+    }
+  });
 })();
