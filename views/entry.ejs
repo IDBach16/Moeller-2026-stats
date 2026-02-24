@@ -1,0 +1,167 @@
+<%- include('partials/header', { title: 'Data Entry - Moeller Baseball' }) %>
+
+<div class="row justify-content-center">
+  <div class="col-lg-10">
+    <h4 class="mb-3">Game Data Entry</h4>
+
+    <!-- Progress -->
+    <div class="mb-3 no-print">
+      <div class="d-flex justify-content-between small text-muted mb-1">
+        <span>Step <span id="currentStep">1</span> of 6</span>
+        <span id="stepLabel">Season Type</span>
+      </div>
+      <div class="progress" style="height: 6px">
+        <div class="progress-bar bg-moeller" id="progressBar" style="width: 16.6%"></div>
+      </div>
+    </div>
+
+    <!-- Step 1: Season Type -->
+    <div class="wizard-step active" id="step1">
+      <div class="card">
+        <div class="card-body">
+          <h5>Select Season Type</h5>
+          <div class="d-flex gap-3 mt-3">
+            <button class="btn btn-lg btn-outline-primary flex-fill season-btn" data-season="regular">
+              Regular Season
+            </button>
+            <button class="btn btn-lg btn-outline-primary flex-fill season-btn" data-season="postseason">
+              Postseason
+            </button>
+          </div>
+          <div class="mt-3">
+            <label class="form-label">Game Result</label>
+            <div class="d-flex gap-2">
+              <button class="btn btn-outline-success result-btn" data-result="W">Win</button>
+              <button class="btn btn-outline-danger result-btn" data-result="L">Loss</button>
+              <button class="btn btn-outline-secondary result-btn" data-result="T">Tie</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mt-3 text-end">
+        <button class="btn btn-moeller" id="step1Next" disabled>Next</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Select Batters -->
+    <div class="wizard-step" id="step2">
+      <div class="card">
+        <div class="card-body">
+          <h5>Select Players Who Batted</h5>
+          <div class="mb-2">
+            <button class="btn btn-sm btn-outline-secondary" id="selectAllBatters">Select All</button>
+            <button class="btn btn-sm btn-outline-secondary" id="deselectAllBatters">Deselect All</button>
+          </div>
+          <div id="batterChecklist" class="row g-2"></div>
+        </div>
+      </div>
+      <div class="mt-3 d-flex justify-content-between">
+        <button class="btn btn-outline-secondary" onclick="goStep(1)">Back</button>
+        <button class="btn btn-moeller" id="step2Next">Next</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Enter Batting Stats -->
+    <div class="wizard-step" id="step3">
+      <div class="card">
+        <div class="card-body">
+          <h5>Enter Batting Stats</h5>
+          <div class="table-responsive">
+            <table class="table table-sm entry-table" id="battingEntryTable">
+              <thead class="table-dark">
+                <tr>
+                  <th>Player</th>
+                  <th>AB</th><th>R</th><th>H</th><th>RBI</th>
+                  <th>2B</th><th>3B</th><th>HR</th>
+                  <th>BB</th><th>SO</th><th>SF</th><th>SH</th><th>HBP</th>
+                  <th>SB</th><th>CS</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div id="battingErrors" class="text-danger small"></div>
+        </div>
+      </div>
+      <div class="mt-3 d-flex justify-content-between">
+        <button class="btn btn-outline-secondary" onclick="goStep(2)">Back</button>
+        <button class="btn btn-moeller" id="step3Next">Next</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Select Pitchers -->
+    <div class="wizard-step" id="step4">
+      <div class="card">
+        <div class="card-body">
+          <h5>Select Players Who Pitched</h5>
+          <div class="mb-2">
+            <button class="btn btn-sm btn-outline-secondary" id="selectAllPitchers">Select All Pitchers</button>
+          </div>
+          <div id="pitcherChecklist" class="row g-2"></div>
+        </div>
+      </div>
+      <div class="mt-3 d-flex justify-content-between">
+        <button class="btn btn-outline-secondary" onclick="goStep(3)">Back</button>
+        <button class="btn btn-moeller" id="step4Next">Next</button>
+      </div>
+    </div>
+
+    <!-- Step 5: Enter Pitching Stats -->
+    <div class="wizard-step" id="step5">
+      <div class="card">
+        <div class="card-body">
+          <h5>Enter Pitching Stats</h5>
+          <div class="table-responsive">
+            <table class="table table-sm entry-table" id="pitchingEntryTable">
+              <thead class="table-dark">
+                <tr>
+                  <th>Player</th>
+                  <th>IP (inn)</th><th>Outs</th>
+                  <th>H</th><th>R</th><th>ER</th>
+                  <th>BB</th><th>SO</th><th>HR</th><th>HBP</th>
+                  <th>GS</th><th>W</th><th>L</th><th>SV</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div id="pitchingErrors" class="text-danger small"></div>
+        </div>
+      </div>
+      <div class="mt-3 d-flex justify-content-between">
+        <button class="btn btn-outline-secondary" onclick="goStep(4)">Back</button>
+        <button class="btn btn-moeller" id="step5Next">Next</button>
+      </div>
+    </div>
+
+    <!-- Step 6: Review & Submit -->
+    <div class="wizard-step" id="step6">
+      <div class="card">
+        <div class="card-body">
+          <h5>Review & Submit</h5>
+          <div id="reviewSummary"></div>
+          <div id="submitError" class="text-danger mt-2" style="display:none"></div>
+        </div>
+      </div>
+      <div class="mt-3 d-flex justify-content-between">
+        <button class="btn btn-outline-secondary" onclick="goStep(5)">Back</button>
+        <button class="btn btn-success btn-lg" id="submitGame">Submit Game</button>
+      </div>
+    </div>
+
+    <!-- Success -->
+    <div class="wizard-step" id="stepDone">
+      <div class="card">
+        <div class="card-body text-center py-5">
+          <h4 class="text-success">Game submitted successfully!</h4>
+          <p class="mt-3">The coach dashboard has been updated in real-time.</p>
+          <a href="/entry" class="btn btn-moeller mt-2">Enter Another Game</a>
+          <a href="/coach" class="btn btn-outline-secondary mt-2">View Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/entry.js"></script>
+<%- include('partials/footer') %>

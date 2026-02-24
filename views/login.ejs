@@ -1,0 +1,26 @@
+<%- include('partials/header', { title: 'Login - Moeller Baseball' }) %>
+
+<div class="row justify-content-center mt-5">
+  <div class="col-md-4">
+    <div class="card shadow">
+      <div class="card-body text-center">
+        <img src="/img/moeller-logo.png" alt="Moeller" height="80" class="mb-3">
+        <h3 class="card-title mb-4">Moeller Baseball Stats</h3>
+        <% if (error) { %>
+        <div class="alert alert-danger"><%= error %></div>
+        <% } %>
+        <form method="POST" action="/login">
+          <div class="mb-3">
+            <input type="text" class="form-control" name="username" placeholder="Username" required autofocus>
+          </div>
+          <div class="mb-3">
+            <input type="password" class="form-control" name="password" placeholder="Password" required>
+          </div>
+          <button type="submit" class="btn btn-moeller w-100">Sign In</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

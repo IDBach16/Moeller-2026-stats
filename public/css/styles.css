@@ -1,0 +1,187 @@
+/* Moeller brand colors */
+:root {
+  --moeller-navy: #1a2a4a;
+  --moeller-gold: #d4a843;
+  --moeller-light: #f8f9fa;
+}
+
+.bg-moeller {
+  background-color: var(--moeller-navy) !important;
+}
+
+.btn-moeller {
+  background-color: var(--moeller-navy);
+  border-color: var(--moeller-navy);
+  color: white;
+}
+.btn-moeller:hover {
+  background-color: #0d1a30;
+  border-color: #0d1a30;
+  color: white;
+}
+
+/* Stats tables */
+.stat-table {
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.stat-table th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  user-select: none;
+  position: relative;
+  padding-right: 14px !important;
+}
+
+.stat-table th.sort-asc::after {
+  content: ' \25B2';
+  font-size: 0.6rem;
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.stat-table th.sort-desc::after {
+  content: ' \25BC';
+  font-size: 0.6rem;
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Sticky first two columns (Last, First) */
+.stat-table-wrap {
+  max-height: 70vh;
+  overflow: auto;
+}
+
+.sticky-col {
+  position: sticky;
+  background: inherit;
+  z-index: 1;
+}
+
+.sticky-col:nth-child(1) {
+  left: 0;
+}
+.sticky-col:nth-child(2) {
+  left: auto;
+}
+
+thead .sticky-col {
+  z-index: 3;
+}
+
+/* Accordion game items */
+.accordion-button:not(.collapsed) {
+  background-color: var(--moeller-navy);
+  color: white;
+}
+
+.accordion-button:focus {
+  box-shadow: 0 0 0 0.2rem rgba(26, 42, 74, 0.25);
+}
+
+/* Nav tabs */
+.nav-tabs .nav-link {
+  color: var(--moeller-navy);
+}
+.nav-tabs .nav-link.active {
+  color: var(--moeller-navy);
+  font-weight: 600;
+  border-bottom: 3px solid var(--moeller-gold);
+}
+
+/* Data entry wizard */
+.wizard-step {
+  display: none;
+}
+.wizard-step.active {
+  display: block;
+}
+
+.player-check {
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+.player-check:hover {
+  background: #e9ecef;
+}
+.player-check input {
+  margin-right: 8px;
+}
+
+.entry-table input[type="number"] {
+  width: 52px;
+  text-align: center;
+  padding: 2px 4px;
+  font-size: 0.85rem;
+}
+
+/* Print styles */
+@media print {
+  .navbar, .no-print, .btn, nav, #sse-status {
+    display: none !important;
+  }
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .print-page {
+    max-width: 100%;
+    font-size: 10pt;
+  }
+  .print-page table {
+    font-size: 8.5pt;
+    page-break-inside: avoid;
+  }
+  @page {
+    margin: 0.5in;
+  }
+}
+
+/* Print page styling */
+.print-page {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.print-page h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.print-page table {
+  font-size: 0.8rem;
+}
+
+.print-page td, .print-page th {
+  padding: 2px 5px !important;
+  white-space: nowrap;
+}
+
+/* Login card */
+.card {
+  border: none;
+}
+
+/* Badge in accordion */
+.accordion-button .badge {
+  font-size: 0.7rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stat-table {
+    font-size: 0.75rem;
+  }
+  .entry-table input[type="number"] {
+    width: 44px;
+  }
+}

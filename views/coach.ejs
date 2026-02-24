@@ -1,0 +1,102 @@
+<%- include('partials/header', { title: 'Coach Dashboard - Moeller Baseball' }) %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0">
+    <%= config.season_year %> Moeller Crusaders
+    <small class="text-muted">Record: <%= config.wins %>-<%= config.losses %>-<%= config.ties %></small>
+  </h4>
+  <div>
+    <a href="/coach/print" class="btn btn-sm btn-outline-secondary">Print Stats</a>
+  </div>
+</div>
+
+<ul class="nav nav-tabs" id="statTabs" role="tablist">
+  <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-total" data-season="total">Total</a></li>
+  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-regular" data-season="regular">Regular Season</a></li>
+  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-postseason" data-season="postseason">Postseason</a></li>
+  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-games" data-season="game-regular">Game Stats</a></li>
+  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-postgames" data-season="game-postseason">POST Game Stats</a></li>
+</ul>
+
+<div class="tab-content mt-3" id="statTabContent">
+  <!-- Total / Regular / Postseason tabs share same structure -->
+  <div class="tab-pane fade show active" id="tab-total">
+    <div class="stat-loading text-center py-4"><div class="spinner-border text-secondary"></div></div>
+    <div class="stat-content" style="display:none">
+      <h5>Batting</h5>
+      <div class="table-responsive stat-table-wrap">
+        <table class="table table-sm table-striped table-hover stat-table batting-table" data-sort-default="avg">
+          <thead class="table-dark sticky-top"></thead>
+          <tbody></tbody>
+          <tfoot class="table-secondary"></tfoot>
+        </table>
+      </div>
+      <h5 class="mt-4">Pitching</h5>
+      <div class="table-responsive stat-table-wrap">
+        <table class="table table-sm table-striped table-hover stat-table pitching-table" data-sort-default="era">
+          <thead class="table-dark sticky-top"></thead>
+          <tbody></tbody>
+          <tfoot class="table-secondary"></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id="tab-regular">
+    <div class="stat-loading text-center py-4"><div class="spinner-border text-secondary"></div></div>
+    <div class="stat-content" style="display:none">
+      <h5>Batting</h5>
+      <div class="table-responsive stat-table-wrap">
+        <table class="table table-sm table-striped table-hover stat-table batting-table" data-sort-default="avg">
+          <thead class="table-dark sticky-top"></thead><tbody></tbody><tfoot class="table-secondary"></tfoot>
+        </table>
+      </div>
+      <h5 class="mt-4">Pitching</h5>
+      <div class="table-responsive stat-table-wrap">
+        <table class="table table-sm table-striped table-hover stat-table pitching-table" data-sort-default="era">
+          <thead class="table-dark sticky-top"></thead><tbody></tbody><tfoot class="table-secondary"></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id="tab-postseason">
+    <div class="stat-loading text-center py-4"><div class="spinner-border text-secondary"></div></div>
+    <div class="stat-content" style="display:none">
+      <h5>Batting</h5>
+      <div class="table-responsive stat-table-wrap">
+        <table class="table table-sm table-striped table-hover stat-table batting-table" data-sort-default="avg">
+          <thead class="table-dark sticky-top"></thead><tbody></tbody><tfoot class="table-secondary"></tfoot>
+        </table>
+      </div>
+      <h5 class="mt-4">Pitching</h5>
+      <div class="table-responsive stat-table-wrap">
+        <table class="table table-sm table-striped table-hover stat-table pitching-table" data-sort-default="era">
+          <thead class="table-dark sticky-top"></thead><tbody></tbody><tfoot class="table-secondary"></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Stats accordion -->
+  <div class="tab-pane fade" id="tab-games">
+    <div class="stat-loading text-center py-4"><div class="spinner-border text-secondary"></div></div>
+    <div class="stat-content" style="display:none">
+      <div class="accordion" id="regularGamesAccordion"></div>
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id="tab-postgames">
+    <div class="stat-loading text-center py-4"><div class="spinner-border text-secondary"></div></div>
+    <div class="stat-content" style="display:none">
+      <div class="accordion" id="postGamesAccordion"></div>
+    </div>
+  </div>
+</div>
+
+<div id="sse-status" class="position-fixed bottom-0 end-0 m-3" style="display:none">
+  <span class="badge bg-success">Live updates active</span>
+</div>
+
+<script src="/js/coach.js"></script>
+<%- include('partials/footer') %>

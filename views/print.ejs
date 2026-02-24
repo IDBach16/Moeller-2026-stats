@@ -1,0 +1,140 @@
+<%- include('partials/header', { title: config.season_year + ' Moeller Crusaders - Stats' }) %>
+
+<div class="no-print mb-3 d-flex gap-2 align-items-center">
+  <label class="form-label mb-0 me-2">View:</label>
+  <a href="/coach/print?season=total" class="btn btn-sm <%= season === 'total' ? 'btn-moeller' : 'btn-outline-secondary' %>">Total</a>
+  <a href="/coach/print?season=regular" class="btn btn-sm <%= season === 'regular' ? 'btn-moeller' : 'btn-outline-secondary' %>">Regular Season</a>
+  <a href="/coach/print?season=postseason" class="btn btn-sm <%= season === 'postseason' ? 'btn-moeller' : 'btn-outline-secondary' %>">Postseason</a>
+  <button class="btn btn-sm btn-outline-primary ms-auto" onclick="window.print()">Print</button>
+</div>
+
+<div class="print-page">
+  <div class="text-center mb-4">
+    <h2><%= config.season_year %> Moeller Crusaders</h2>
+    <div>Overall Statistics</div>
+    <div>Record: <%= config.wins %>-<%= config.losses %>-<%= config.ties %></div>
+  </div>
+
+  <div class="text-center mb-2"><small>Sorted by Batting Average</small></div>
+  <table class="table table-sm table-bordered mb-4" style="font-size:0.78rem">
+    <thead>
+      <tr class="table-light">
+        <th>Last</th><th>First</th><th>GP</th><th>PA</th><th>AB</th>
+        <th>H</th><th>2B</th><th>3B</th><th>HR</th><th>R</th><th>RBI</th>
+        <th>BB</th><th>HBP</th><th>SO</th>
+        <th>AVG</th><th>OBP</th><th>OPS</th>
+        <th>SAC</th><th>SF</th><th>SB</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% batting.forEach(function(row) { %>
+      <tr>
+        <td><%= row.last_name %></td>
+        <td><%= row.first_name %></td>
+        <td class="text-end"><%= row.gp %></td>
+        <td class="text-end"><%= row.pa %></td>
+        <td class="text-end"><%= row.ab %></td>
+        <td class="text-end"><%= row.h %></td>
+        <td class="text-end"><%= row['2b'] %></td>
+        <td class="text-end"><%= row['3b'] %></td>
+        <td class="text-end"><%= row.hr %></td>
+        <td class="text-end"><%= row.r %></td>
+        <td class="text-end"><%= row.rbi %></td>
+        <td class="text-end"><%= row.bb %></td>
+        <td class="text-end"><%= row.hbp %></td>
+        <td class="text-end"><%= row.so %></td>
+        <td class="text-end"><%= row.avg === 0 ? '.000' : row.avg.toFixed(3).replace(/^0/, '') %></td>
+        <td class="text-end"><%= row.obp === 0 ? '.000' : row.obp.toFixed(3).replace(/^0/, '') %></td>
+        <td class="text-end"><%= row.ops === 0 ? '.000' : row.ops.toFixed(3).replace(/^0/, '') %></td>
+        <td class="text-end"><%= row.sh %></td>
+        <td class="text-end"><%= row.sf %></td>
+        <td class="text-end"><%= row.sb %></td>
+      </tr>
+      <% }); %>
+    </tbody>
+    <% if (battingTotals) { %>
+    <tfoot>
+      <tr class="fw-bold table-secondary">
+        <td colspan="2"></td>
+        <td class="text-end"><%= battingTotals.gp %></td>
+        <td class="text-end"><%= battingTotals.pa %></td>
+        <td class="text-end"><%= battingTotals.ab %></td>
+        <td class="text-end"><%= battingTotals.h %></td>
+        <td class="text-end"><%= battingTotals['2b'] %></td>
+        <td class="text-end"><%= battingTotals['3b'] %></td>
+        <td class="text-end"><%= battingTotals.hr %></td>
+        <td class="text-end"><%= battingTotals.r %></td>
+        <td class="text-end"><%= battingTotals.rbi %></td>
+        <td class="text-end"><%= battingTotals.bb %></td>
+        <td class="text-end"><%= battingTotals.hbp %></td>
+        <td class="text-end"><%= battingTotals.so %></td>
+        <td class="text-end"><%= battingTotals.avg === 0 ? '.000' : battingTotals.avg.toFixed(3).replace(/^0/, '') %></td>
+        <td class="text-end"><%= battingTotals.obp === 0 ? '.000' : battingTotals.obp.toFixed(3).replace(/^0/, '') %></td>
+        <td class="text-end"><%= battingTotals.ops === 0 ? '.000' : battingTotals.ops.toFixed(3).replace(/^0/, '') %></td>
+        <td class="text-end"><%= battingTotals.sh %></td>
+        <td class="text-end"><%= battingTotals.sf %></td>
+        <td class="text-end"><%= battingTotals.sb %></td>
+      </tr>
+    </tfoot>
+    <% } %>
+  </table>
+
+  <div class="text-center mb-2"><small>Sorted by Earned Run Average</small></div>
+  <table class="table table-sm table-bordered" style="font-size:0.78rem">
+    <thead>
+      <tr class="table-light">
+        <th>Last</th><th>First</th><th>GP</th><th>GS</th><th>IP</th>
+        <th>W</th><th>L</th><th>SV</th>
+        <th>H</th><th>R</th><th>ER</th><th>BB</th><th>SO</th><th>HBP</th>
+        <th>ERA</th><th>WHIP</th><th>BAA</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% pitching.forEach(function(row) { %>
+      <tr>
+        <td><%= row.last_name %></td>
+        <td><%= row.first_name %></td>
+        <td class="text-end"><%= row.gp %></td>
+        <td class="text-end"><%= row.gs %></td>
+        <td class="text-end"><%= row.ip_whole %>.<%= row.ip_remainder %></td>
+        <td class="text-end"><%= row.w %></td>
+        <td class="text-end"><%= row.l %></td>
+        <td class="text-end"><%= row.sv %></td>
+        <td class="text-end"><%= row.h %></td>
+        <td class="text-end"><%= row.r %></td>
+        <td class="text-end"><%= row.er %></td>
+        <td class="text-end"><%= row.bb %></td>
+        <td class="text-end"><%= row.so %></td>
+        <td class="text-end"><%= row.hbp %></td>
+        <td class="text-end"><%= row.era.toFixed(2) %></td>
+        <td class="text-end"><%= row.whip.toFixed(2) %></td>
+        <td class="text-end"><%= row.baa === 0 ? '.000' : row.baa.toFixed(3).replace(/^0/, '') %></td>
+      </tr>
+      <% }); %>
+    </tbody>
+    <% if (pitchingTotals) { %>
+    <tfoot>
+      <tr class="fw-bold table-secondary">
+        <td colspan="2"></td>
+        <td class="text-end"><%= pitchingTotals.gp %></td>
+        <td class="text-end"><%= pitchingTotals.gs %></td>
+        <td class="text-end"><%= pitchingTotals.ip_whole %>.<%= pitchingTotals.ip_remainder %></td>
+        <td class="text-end"><%= pitchingTotals.w %></td>
+        <td class="text-end"><%= pitchingTotals.l %></td>
+        <td class="text-end"><%= pitchingTotals.sv %></td>
+        <td class="text-end"><%= pitchingTotals.h %></td>
+        <td class="text-end"><%= pitchingTotals.r %></td>
+        <td class="text-end"><%= pitchingTotals.er %></td>
+        <td class="text-end"><%= pitchingTotals.bb %></td>
+        <td class="text-end"><%= pitchingTotals.so %></td>
+        <td class="text-end"><%= pitchingTotals.hbp %></td>
+        <td class="text-end"><%= pitchingTotals.era.toFixed(2) %></td>
+        <td class="text-end"><%= pitchingTotals.whip.toFixed(2) %></td>
+        <td class="text-end"><%= pitchingTotals.baa === 0 ? '.000' : pitchingTotals.baa.toFixed(3).replace(/^0/, '') %></td>
+      </tr>
+    </tfoot>
+    <% } %>
+  </table>
+</div>
+
+<%- include('partials/footer') %>

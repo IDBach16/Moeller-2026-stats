@@ -1,0 +1,101 @@
+<%- include('partials/header', { title: 'Roster Management - Moeller Baseball' }) %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0"><%= config.season_year %> Roster</h4>
+  <button class="btn btn-moeller" data-bs-toggle="modal" data-bs-target="#playerModal" onclick="openAddPlayer()">
+    + Add Player
+  </button>
+</div>
+
+<!-- Filter Buttons -->
+<div class="btn-group mb-3" id="filterBtns">
+  <button class="btn btn-sm btn-outline-secondary active" data-filter="active">Active</button>
+  <button class="btn btn-sm btn-outline-secondary" data-filter="inactive">Inactive</button>
+  <button class="btn btn-sm btn-outline-secondary" data-filter="all">All</button>
+</div>
+
+<!-- Player Table -->
+<div class="table-responsive">
+  <table class="table table-sm table-striped table-hover" id="rosterTable">
+    <thead class="table-dark">
+      <tr>
+        <th>Last Name</th>
+        <th>First Name</th>
+        <th>Class</th>
+        <th>Pitcher</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<div id="rosterEmpty" class="text-center text-muted py-4" style="display:none">
+  No players found. Click <strong>+ Add Player</strong> to get started.
+</div>
+
+<!-- Add/Edit Player Modal -->
+<div class="modal fade" id="playerModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-moeller text-white">
+        <h5 class="modal-title" id="playerModalTitle">Add Player</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editPlayerId">
+        <div class="mb-3">
+          <label class="form-label">First Name</label>
+          <input type="text" class="form-control" id="playerFirst" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Last Name</label>
+          <input type="text" class="form-control" id="playerLast" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Class Year</label>
+          <select class="form-select" id="playerClass">
+            <option value="">-- Select --</option>
+            <option value="Fr">Fr</option>
+            <option value="So">So</option>
+            <option value="Jr">Jr</option>
+            <option value="Sr">Sr</option>
+          </select>
+        </div>
+        <div class="form-check form-switch mb-3">
+          <input class="form-check-input" type="checkbox" id="playerPitcher">
+          <label class="form-check-label" for="playerPitcher">Pitcher</label>
+        </div>
+        <div id="playerFormError" class="text-danger small"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-moeller" id="savePlayerBtn" onclick="savePlayer()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Delete Player</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete <strong id="deletePlayerName"></strong>?</p>
+        <div id="deleteError" class="text-danger small"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/roster.js"></script>
+<%- include('partials/footer') %>

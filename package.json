@@ -1,0 +1,15 @@
+{
+  "name": "moeller-stats",
+  "version": "1.0.0",
+  "description": "Moeller Crusaders Baseball Stats Web App",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.6.2",
+    "ejs": "^4.0.1",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0"
+  }
+}
