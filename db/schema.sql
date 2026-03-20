@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS games (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   game_number INTEGER NOT NULL,
   season_type TEXT NOT NULL CHECK(season_type IN ('regular','postseason')),
+  game_tag TEXT NOT NULL DEFAULT 'conference' CHECK(game_tag IN ('conference','non_conference','exhibition')),
   result TEXT CHECK(result IN ('W','L','T',NULL))
 );
 

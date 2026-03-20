@@ -4,6 +4,7 @@
   let allPlayers = [];
   let gameData = {
     seasonType: null,
+    gameTag: null,
     result: null,
     selectedBatters: [],
     selectedPitchers: [],
@@ -56,8 +57,22 @@
     });
   });
 
+  // Game tag buttons
+  document.querySelectorAll('.tag-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tag-btn').forEach(b => {
+        b.classList.remove('active');
+        b.className = b.className.replace(/btn-(info|warning|secondary)(?!-)/, 'btn-outline-$1');
+      });
+      btn.classList.add('active');
+      btn.className = btn.className.replace('btn-outline-', 'btn-');
+      gameData.gameTag = btn.dataset.tag;
+      checkStep1();
+    });
+  });
+
   function checkStep1() {
-    document.getElementById('step1Next').disabled = !(gameData.seasonType && gameData.result);
+    document.getElementById('step1Next').disabled = !(gameData.seasonType && gameData.gameTag && gameData.result);
   }
 
   document.getElementById('step1Next').addEventListener('click', () => goStep(2));
@@ -258,12 +273,16 @@
     const teamER = gameData.pitching.reduce((s, p) => s + p.er, 0);
     const teamRA = gameData.pitching.reduce((s, p) => s + p.r, 0);
 
+    const tagLabels = { conference: 'Conference', non_conference: 'Non-Conference', exhibition: 'Exhibition' };
     div.innerHTML = `
       <div class="row mb-3">
-        <div class="col-md-6">
+        <div class="col-md-4">
           <strong>Season:</strong> ${gameData.seasonType === 'regular' ? 'Regular Season' : 'Postseason'}
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
+          <strong>Type:</strong> <span class="badge bg-info">${tagLabels[gameData.gameTag] || gameData.gameTag}</span>
+        </div>
+        <div class="col-md-4">
           <strong>Result:</strong> <span class="badge ${gameData.result === 'W' ? 'bg-success' : gameData.result === 'L' ? 'bg-danger' : 'bg-secondary'}">${gameData.result}</span>
         </div>
       </div>
@@ -321,6 +340,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           seasonType: gameData.seasonType,
+          gameTag: gameData.gameTag,
           result: gameData.result,
           batters: gameData.batting,
           pitchers: gameData.pitching

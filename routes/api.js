@@ -21,23 +21,26 @@ router.get('/events', (req, res) => {
 // Batting stats
 router.get('/stats/batting', (req, res) => {
   const season = req.query.season || 'total';
-  const rows = stats.getBattingStats(season);
-  const totals = stats.getBattingTotals(season);
+  const tag = req.query.tag || null;
+  const rows = stats.getBattingStats(season, tag);
+  const totals = stats.getBattingTotals(season, tag);
   res.json({ rows, totals });
 });
 
 // Pitching stats
 router.get('/stats/pitching', (req, res) => {
   const season = req.query.season || 'total';
-  const rows = stats.getPitchingStats(season);
-  const totals = stats.getPitchingTotals(season);
+  const tag = req.query.tag || null;
+  const rows = stats.getPitchingStats(season, tag);
+  const totals = stats.getPitchingTotals(season, tag);
   res.json({ rows, totals });
 });
 
 // Games list
 router.get('/games', (req, res) => {
   const season = req.query.season;
-  const games = stats.getGamesList(season);
+  const tag = req.query.tag;
+  const games = stats.getGamesList(season, tag);
   res.json(games);
 });
 
@@ -51,11 +54,13 @@ router.get('/games/:id', (req, res) => {
 // Submit new game
 router.post('/games', (req, res) => {
   const db = getDb();
-  const { seasonType, result, batters, pitchers } = req.body;
+  const { seasonType, gameTag, result, batters, pitchers } = req.body;
 
   if (!seasonType || !batters || !pitchers) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
+
+  const tag = gameTag || 'conference';
 
   // Get next game number
   const last = db.prepare(
@@ -64,7 +69,7 @@ router.post('/games', (req, res) => {
   const gameNumber = (last.max_num || 0) + 1;
 
   const insertGame = db.prepare(
-    'INSERT INTO games (game_number, season_type, result) VALUES (?, ?, ?)'
+    'INSERT INTO games (game_number, season_type, game_tag, result) VALUES (?, ?, ?, ?)'
   );
   const insertBatting = db.prepare(
     `INSERT INTO game_batting (game_id, player_id, ab, r, h, rbi, doubles, triples, hr, bb, so, sf, sh, hbp, sb, cs, errors)
@@ -76,7 +81,7 @@ router.post('/games', (req, res) => {
   );
 
   const doInsert = db.transaction(() => {
-    const gameRes = insertGame.run(gameNumber, seasonType, result || null);
+    const gameRes = insertGame.run(gameNumber, seasonType, tag, result || null);
     const gameId = gameRes.lastInsertRowid;
 
     for (const b of batters) {
@@ -119,7 +124,7 @@ router.post('/games', (req, res) => {
 router.put('/games/:id', (req, res) => {
   const db = getDb();
   const gameId = parseInt(req.params.id);
-  const { result, batters, pitchers } = req.body;
+  const { result, gameTag, seasonType, batters, pitchers } = req.body;
 
   const game = db.prepare('SELECT * FROM games WHERE id = ?').get(gameId);
   if (!game) return res.status(404).json({ error: 'Game not found' });
@@ -137,6 +142,16 @@ router.put('/games/:id', (req, res) => {
       if (result === 'W') db.prepare("UPDATE config SET value = CAST(CAST(value AS INTEGER) + 1 AS TEXT) WHERE key = 'wins'").run();
       else if (result === 'L') db.prepare("UPDATE config SET value = CAST(CAST(value AS INTEGER) + 1 AS TEXT) WHERE key = 'losses'").run();
       else if (result === 'T') db.prepare("UPDATE config SET value = CAST(CAST(value AS INTEGER) + 1 AS TEXT) WHERE key = 'ties'").run();
+    }
+
+    // Update game tag
+    if (gameTag) {
+      db.prepare('UPDATE games SET game_tag = ? WHERE id = ?').run(gameTag, gameId);
+    }
+
+    // Update season type
+    if (seasonType) {
+      db.prepare('UPDATE games SET season_type = ? WHERE id = ?').run(seasonType, gameId);
     }
 
     if (batters) {
