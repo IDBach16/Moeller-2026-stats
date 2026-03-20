@@ -130,18 +130,14 @@
         <input type="hidden" id="editGameId">
         <div class="row mb-3">
           <div class="col-md-4">
-            <label class="form-label fw-bold">Season Type</label>
-            <select class="form-select" id="editSeasonType">
-              <option value="regular">Regular Season</option>
-              <option value="postseason">Postseason</option>
-            </select>
+            <label class="form-label fw-bold">Opponent</label>
+            <input type="text" class="form-control" id="editOpponent" placeholder="Opponent name">
           </div>
           <div class="col-md-4">
-            <label class="form-label fw-bold">Game Classification</label>
-            <select class="form-select" id="editGameTag">
-              <option value="conference">Conference</option>
-              <option value="non_conference">Non-Conference</option>
-              <option value="exhibition">Exhibition</option>
+            <label class="form-label fw-bold">Home / Away</label>
+            <select class="form-select" id="editHomeAway">
+              <option value="home">Home</option>
+              <option value="away">Away</option>
             </select>
           </div>
           <div class="col-md-4">
@@ -150,6 +146,23 @@
               <option value="W">Win</option>
               <option value="L">Loss</option>
               <option value="T">Tie</option>
+            </select>
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Season Type</label>
+            <select class="form-select" id="editSeasonType">
+              <option value="regular">Regular Season</option>
+              <option value="postseason">Postseason</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Game Classification</label>
+            <select class="form-select" id="editGameTag">
+              <option value="conference">Conference</option>
+              <option value="non_conference">Non-Conference</option>
+              <option value="exhibition">Exhibition</option>
             </select>
           </div>
         </div>

@@ -5,6 +5,8 @@
   let gameData = {
     seasonType: null,
     gameTag: null,
+    opponent: '',
+    homeAway: null,
     result: null,
     selectedBatters: [],
     selectedPitchers: [],
@@ -57,6 +59,26 @@
     });
   });
 
+  // Opponent name
+  document.getElementById('opponentName').addEventListener('input', (e) => {
+    gameData.opponent = e.target.value.trim();
+    checkStep1();
+  });
+
+  // Home/Away buttons
+  document.querySelectorAll('.ha-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.ha-btn').forEach(b => {
+        b.classList.remove('active', 'btn-primary');
+        b.classList.add('btn-outline-primary');
+      });
+      btn.classList.add('active', 'btn-primary');
+      btn.classList.remove('btn-outline-primary');
+      gameData.homeAway = btn.dataset.ha;
+      checkStep1();
+    });
+  });
+
   // Game tag buttons
   document.querySelectorAll('.tag-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -72,7 +94,7 @@
   });
 
   function checkStep1() {
-    document.getElementById('step1Next').disabled = !(gameData.seasonType && gameData.gameTag && gameData.result);
+    document.getElementById('step1Next').disabled = !(gameData.seasonType && gameData.gameTag && gameData.opponent && gameData.homeAway && gameData.result);
   }
 
   document.getElementById('step1Next').addEventListener('click', () => goStep(2));
@@ -274,16 +296,16 @@
     const teamRA = gameData.pitching.reduce((s, p) => s + p.r, 0);
 
     const tagLabels = { conference: 'Conference', non_conference: 'Non-Conference', exhibition: 'Exhibition' };
+    const haLabel = gameData.homeAway === 'home' ? 'vs' : '@';
     div.innerHTML = `
       <div class="row mb-3">
-        <div class="col-md-4">
-          <strong>Season:</strong> ${gameData.seasonType === 'regular' ? 'Regular Season' : 'Postseason'}
+        <div class="col-md-6">
+          <strong>Moeller ${haLabel} ${gameData.opponent}</strong>
         </div>
-        <div class="col-md-4">
-          <strong>Type:</strong> <span class="badge bg-info">${tagLabels[gameData.gameTag] || gameData.gameTag}</span>
-        </div>
-        <div class="col-md-4">
-          <strong>Result:</strong> <span class="badge ${gameData.result === 'W' ? 'bg-success' : gameData.result === 'L' ? 'bg-danger' : 'bg-secondary'}">${gameData.result}</span>
+        <div class="col-md-6 text-end">
+          <span class="badge ${gameData.result === 'W' ? 'bg-success' : gameData.result === 'L' ? 'bg-danger' : 'bg-secondary'}">${gameData.result}</span>
+          <span class="badge bg-info">${tagLabels[gameData.gameTag] || gameData.gameTag}</span>
+          <span class="badge bg-dark">${gameData.seasonType === 'regular' ? 'Regular' : 'Postseason'}</span>
         </div>
       </div>
       <div class="row mb-2">
@@ -341,6 +363,8 @@
         body: JSON.stringify({
           seasonType: gameData.seasonType,
           gameTag: gameData.gameTag,
+          opponent: gameData.opponent,
+          homeAway: gameData.homeAway,
           result: gameData.result,
           batters: gameData.batting,
           pitchers: gameData.pitching

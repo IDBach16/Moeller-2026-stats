@@ -257,8 +257,9 @@
         item.innerHTML = `
           <h2 class="accordion-header">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#game-${game.id}">
-              Game ${game.game_number}
+              Game ${game.game_number}${game.opponent ? ` — ${game.home_away === 'away' ? '@' : 'vs'} ${game.opponent}` : ''}
               <span class="badge ${resultBadge} ms-2">${game.result || '-'}</span>
+              ${game.game_tag && game.game_tag !== 'conference' ? `<span class="badge bg-secondary ms-1">${game.game_tag === 'non_conference' ? 'NC' : 'EXH'}</span>` : ''}
             </button>
           </h2>
           <div id="game-${game.id}" class="accordion-collapse collapse" data-bs-parent="#${accordionId}">
@@ -379,9 +380,11 @@
     try {
       const detail = await fetch('/api/games/' + gameId).then(r => r.json());
       document.getElementById('editGameId').value = gameId;
-      document.getElementById('editGameTitle').textContent = `#${detail.game.game_number}`;
+      document.getElementById('editGameTitle').textContent = `#${detail.game.game_number}${detail.game.opponent ? ' — ' + detail.game.opponent : ''}`;
       document.getElementById('editSeasonType').value = detail.game.season_type;
       document.getElementById('editGameTag').value = detail.game.game_tag || 'conference';
+      document.getElementById('editOpponent').value = detail.game.opponent || '';
+      document.getElementById('editHomeAway').value = detail.game.home_away || 'home';
       document.getElementById('editResult').value = detail.game.result || 'W';
       document.getElementById('editError').style.display = 'none';
 
@@ -468,6 +471,8 @@
           result: document.getElementById('editResult').value,
           seasonType: document.getElementById('editSeasonType').value,
           gameTag: document.getElementById('editGameTag').value,
+          opponent: document.getElementById('editOpponent').value,
+          homeAway: document.getElementById('editHomeAway').value,
           batters,
           pitchers,
         })

@@ -54,13 +54,15 @@ router.get('/games/:id', (req, res) => {
 // Submit new game
 router.post('/games', (req, res) => {
   const db = getDb();
-  const { seasonType, gameTag, result, batters, pitchers } = req.body;
+  const { seasonType, gameTag, opponent, homeAway, result, batters, pitchers } = req.body;
 
   if (!seasonType || !batters || !pitchers) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
   const tag = gameTag || 'conference';
+  const opp = opponent || '';
+  const ha = homeAway || 'home';
 
   // Get next game number
   const last = db.prepare(
@@ -69,7 +71,7 @@ router.post('/games', (req, res) => {
   const gameNumber = (last.max_num || 0) + 1;
 
   const insertGame = db.prepare(
-    'INSERT INTO games (game_number, season_type, game_tag, result) VALUES (?, ?, ?, ?)'
+    'INSERT INTO games (game_number, season_type, game_tag, opponent, home_away, result) VALUES (?, ?, ?, ?, ?, ?)'
   );
   const insertBatting = db.prepare(
     `INSERT INTO game_batting (game_id, player_id, ab, r, h, rbi, doubles, triples, hr, bb, so, sf, sh, hbp, sb, cs, errors)
@@ -81,7 +83,7 @@ router.post('/games', (req, res) => {
   );
 
   const doInsert = db.transaction(() => {
-    const gameRes = insertGame.run(gameNumber, seasonType, tag, result || null);
+    const gameRes = insertGame.run(gameNumber, seasonType, tag, opp, ha, result || null);
     const gameId = gameRes.lastInsertRowid;
 
     for (const b of batters) {
@@ -124,7 +126,7 @@ router.post('/games', (req, res) => {
 router.put('/games/:id', (req, res) => {
   const db = getDb();
   const gameId = parseInt(req.params.id);
-  const { result, gameTag, seasonType, batters, pitchers } = req.body;
+  const { result, gameTag, seasonType, opponent, homeAway, batters, pitchers } = req.body;
 
   const game = db.prepare('SELECT * FROM games WHERE id = ?').get(gameId);
   if (!game) return res.status(404).json({ error: 'Game not found' });
@@ -152,6 +154,16 @@ router.put('/games/:id', (req, res) => {
     // Update season type
     if (seasonType) {
       db.prepare('UPDATE games SET season_type = ? WHERE id = ?').run(seasonType, gameId);
+    }
+
+    // Update opponent
+    if (opponent !== undefined) {
+      db.prepare('UPDATE games SET opponent = ? WHERE id = ?').run(opponent, gameId);
+    }
+
+    // Update home/away
+    if (homeAway) {
+      db.prepare('UPDATE games SET home_away = ? WHERE id = ?').run(homeAway, gameId);
     }
 
     if (batters) {
