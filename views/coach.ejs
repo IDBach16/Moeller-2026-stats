@@ -15,6 +15,7 @@
   <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-total" data-season="total">Total</a></li>
   <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-regular" data-season="regular">Regular Season</a></li>
   <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-postseason" data-season="postseason">Postseason</a></li>
+  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-exhibition" data-season="exhibition">Exhibition</a></li>
   <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-games" data-season="game-regular">Game Stats</a></li>
   <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-postgames" data-season="game-postseason">POST Game Stats</a></li>
 </ul>
@@ -71,6 +72,24 @@
         </table>
       </div>
       <h5 class="mt-4">Pitching</h5>
+      <div class="table-responsive stat-table-wrap">
+        <table class="table table-sm table-striped table-hover stat-table pitching-table" data-sort-default="era">
+          <thead class="table-dark sticky-top"></thead><tbody></tbody><tfoot class="table-secondary"></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id="tab-exhibition">
+    <div class="stat-loading text-center py-4"><div class="spinner-border text-secondary"></div></div>
+    <div class="stat-content" style="display:none">
+      <h5>Batting <span class="badge bg-secondary">Exhibition</span></h5>
+      <div class="table-responsive stat-table-wrap">
+        <table class="table table-sm table-striped table-hover stat-table batting-table" data-sort-default="avg">
+          <thead class="table-dark sticky-top"></thead><tbody></tbody><tfoot class="table-secondary"></tfoot>
+        </table>
+      </div>
+      <h5 class="mt-4">Pitching <span class="badge bg-secondary">Exhibition</span></h5>
       <div class="table-responsive stat-table-wrap">
         <table class="table table-sm table-striped table-hover stat-table pitching-table" data-sort-default="era">
           <thead class="table-dark sticky-top"></thead><tbody></tbody><tfoot class="table-secondary"></tfoot>

@@ -312,6 +312,7 @@
     if (season === 'total') loadAggregateTab('tab-total', 'total');
     else if (season === 'regular') loadAggregateTab('tab-regular', 'regular');
     else if (season === 'postseason') loadAggregateTab('tab-postseason', 'postseason');
+    else if (season === 'exhibition') loadAggregateTab('tab-exhibition', 'exhibition');
     else if (season === 'game-regular') loadGameTab('tab-games', 'regular', 'regularGamesAccordion');
     else if (season === 'game-postseason') loadGameTab('tab-postgames', 'postseason', 'postGamesAccordion');
   }
