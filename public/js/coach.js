@@ -263,7 +263,8 @@
           </h2>
           <div id="game-${game.id}" class="accordion-collapse collapse" data-bs-parent="#${accordionId}">
             <div class="accordion-body p-2">
-              <div class="d-flex justify-content-end mb-2">
+              <div class="d-flex justify-content-end mb-2 gap-2">
+                <button class="btn btn-sm btn-outline-primary edit-game-btn" data-game-id="${game.id}">Edit Game</button>
                 <button class="btn btn-sm btn-outline-danger delete-game-btn" data-game-id="${game.id}" data-game-num="${game.game_number}">Delete Game</button>
               </div>
               <h6>Hitting</h6>
@@ -362,6 +363,133 @@
   }
 
   connectSSE();
+
+  // Edit game handler
+  const EDIT_BAT_FIELDS = ['ab','r','h','rbi','doubles','triples','hr','bb','so','sf','sh','hbp','sb','cs','errors'];
+  const EDIT_PIT_FIELDS = ['ip_full','ip_partial','h','r','er','bb','so','hr','hbp'];
+  const EDIT_PIT_CHECKS = ['gs','w','l','sv','cg','sho'];
+
+  document.addEventListener('click', async e => {
+    const editBtn = e.target.closest('.edit-game-btn');
+    if (!editBtn) return;
+    const gameId = editBtn.dataset.gameId;
+
+    editBtn.disabled = true;
+    editBtn.textContent = 'Loading...';
+    try {
+      const detail = await fetch('/api/games/' + gameId).then(r => r.json());
+      document.getElementById('editGameId').value = gameId;
+      document.getElementById('editGameTitle').textContent = `#${detail.game.game_number}`;
+      document.getElementById('editSeasonType').value = detail.game.season_type;
+      document.getElementById('editGameTag').value = detail.game.game_tag || 'conference';
+      document.getElementById('editResult').value = detail.game.result || 'W';
+      document.getElementById('editError').style.display = 'none';
+
+      // Build batting edit table
+      const batHead = document.querySelector('#editBattingTable thead');
+      const batBody = document.querySelector('#editBattingTable tbody');
+      batHead.innerHTML = '<tr><th>Player</th>' + EDIT_BAT_FIELDS.map(f => `<th>${f.toUpperCase()}</th>`).join('') + '</tr>';
+      batBody.innerHTML = '';
+      detail.batting.forEach(b => {
+        const tr = document.createElement('tr');
+        tr.dataset.playerId = b.player_id;
+        tr.innerHTML = `<td class="text-nowrap fw-bold">${b.last_name}, ${b.first_name}</td>` +
+          EDIT_BAT_FIELDS.map(f => `<td><input type="number" min="0" max="99" value="${b[f] || 0}" class="form-control form-control-sm" data-field="${f}" style="width:55px"></td>`).join('');
+        batBody.appendChild(tr);
+      });
+
+      // Build pitching edit table
+      const pitHead = document.querySelector('#editPitchingTable thead');
+      const pitBody = document.querySelector('#editPitchingTable tbody');
+      pitHead.innerHTML = '<tr><th>Player</th>' + EDIT_PIT_FIELDS.map(f => `<th>${f === 'ip_full' ? 'IP' : f === 'ip_partial' ? '.X' : f.toUpperCase()}</th>`).join('') +
+        EDIT_PIT_CHECKS.map(f => `<th>${f.toUpperCase()}</th>`).join('') + '</tr>';
+      pitBody.innerHTML = '';
+      detail.pitching.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.dataset.playerId = p.player_id;
+        let html = `<td class="text-nowrap fw-bold">${p.last_name}, ${p.first_name}</td>`;
+        EDIT_PIT_FIELDS.forEach(f => {
+          if (f === 'ip_partial') {
+            html += `<td><select class="form-select form-select-sm" data-field="${f}" style="width:55px">
+              <option value="0" ${(p[f]||0)==0?'selected':''}>0</option>
+              <option value="1" ${(p[f]||0)==1?'selected':''}>1</option>
+              <option value="2" ${(p[f]||0)==2?'selected':''}>2</option>
+            </select></td>`;
+          } else {
+            html += `<td><input type="number" min="0" max="99" value="${p[f] || 0}" class="form-control form-control-sm" data-field="${f}" style="width:55px"></td>`;
+          }
+        });
+        EDIT_PIT_CHECKS.forEach(f => {
+          html += `<td><input type="checkbox" class="form-check-input" data-field="${f}" ${p[f] ? 'checked' : ''}></td>`;
+        });
+        tr.innerHTML = html;
+        pitBody.appendChild(tr);
+      });
+
+      new bootstrap.Modal(document.getElementById('editGameModal')).show();
+    } catch (err) {
+      alert('Failed to load game: ' + err.message);
+    }
+    editBtn.disabled = false;
+    editBtn.textContent = 'Edit Game';
+  });
+
+  // Save edit
+  document.getElementById('saveEditGame').addEventListener('click', async () => {
+    const gameId = document.getElementById('editGameId').value;
+    const saveBtn = document.getElementById('saveEditGame');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+
+    const batters = [];
+    document.querySelectorAll('#editBattingTable tbody tr').forEach(tr => {
+      const entry = { player_id: parseInt(tr.dataset.playerId) };
+      tr.querySelectorAll('input').forEach(inp => {
+        entry[inp.dataset.field] = parseInt(inp.value) || 0;
+      });
+      batters.push(entry);
+    });
+
+    const pitchers = [];
+    document.querySelectorAll('#editPitchingTable tbody tr').forEach(tr => {
+      const entry = { player_id: parseInt(tr.dataset.playerId) };
+      tr.querySelectorAll('input, select').forEach(inp => {
+        if (inp.type === 'checkbox') entry[inp.dataset.field] = inp.checked ? 1 : 0;
+        else entry[inp.dataset.field] = parseInt(inp.value) || 0;
+      });
+      pitchers.push(entry);
+    });
+
+    try {
+      const res = await fetch('/api/games/' + gameId, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          result: document.getElementById('editResult').value,
+          seasonType: document.getElementById('editSeasonType').value,
+          gameTag: document.getElementById('editGameTag').value,
+          batters,
+          pitchers,
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        bootstrap.Modal.getInstance(document.getElementById('editGameModal')).hide();
+        // Reload all tabs
+        Object.keys(loaded).forEach(k => { loaded[k] = false; });
+        const activeTab = document.querySelector('#statTabs .nav-link.active');
+        if (activeTab) loadTab(activeTab.dataset.season);
+      } else {
+        document.getElementById('editError').textContent = data.error || 'Save failed';
+        document.getElementById('editError').style.display = '';
+      }
+    } catch (err) {
+      document.getElementById('editError').textContent = 'Network error: ' + err.message;
+      document.getElementById('editError').style.display = '';
+    }
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save Changes';
+  });
 
   // Delete game handler
   document.addEventListener('click', async e => {

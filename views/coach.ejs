@@ -118,5 +118,64 @@
   <span class="badge bg-success">Live updates active</span>
 </div>
 
+<!-- Edit Game Modal -->
+<div class="modal fade" id="editGameModal" tabindex="-1">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title">Edit Game <span id="editGameTitle"></span></h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editGameId">
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Season Type</label>
+            <select class="form-select" id="editSeasonType">
+              <option value="regular">Regular Season</option>
+              <option value="postseason">Postseason</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Game Classification</label>
+            <select class="form-select" id="editGameTag">
+              <option value="conference">Conference</option>
+              <option value="non_conference">Non-Conference</option>
+              <option value="exhibition">Exhibition</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Result</label>
+            <select class="form-select" id="editResult">
+              <option value="W">Win</option>
+              <option value="L">Loss</option>
+              <option value="T">Tie</option>
+            </select>
+          </div>
+        </div>
+        <h6>Batting</h6>
+        <div class="table-responsive">
+          <table class="table table-sm table-striped" id="editBattingTable">
+            <thead class="table-dark"></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <h6 class="mt-3">Pitching</h6>
+        <div class="table-responsive">
+          <table class="table table-sm table-striped" id="editPitchingTable">
+            <thead class="table-dark"></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div id="editError" class="alert alert-danger mt-2" style="display:none"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveEditGame">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="/js/coach.js"></script>
 <%- include('partials/footer') %>
