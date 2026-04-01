@@ -5,12 +5,54 @@ const stats = require('../lib/stats');
 const { broadcast } = require('../lib/sse');
 const { addClient } = require('../lib/sse');
 
-// Database backup download
+// Database backup download (SQLite)
 router.get('/backup', (req, res) => {
   const db = getDb();
   db.pragma('wal_checkpoint(TRUNCATE)');
   const date = new Date().toISOString().slice(0, 10);
   res.download(DB_PATH, `moeller_backup_${date}.db`);
+});
+
+// CSV export — batting and pitching stats
+router.get('/export/csv', (req, res) => {
+  const season = req.query.season || 'total';
+  const tag = req.query.tag || null;
+  const batting = stats.getBattingStats(season, tag);
+  const pitching = stats.getPitchingStats(season, tag);
+  const date = new Date().toISOString().slice(0, 10);
+
+  // Batting CSV
+  const batHeaders = ['Last','First','Class','GP','PA','AB','H','2B','3B','HR','TB','R','RBI','BB','HBP','SO','SF','SH','SB','CS','E','AVG','OBP','SLG','OPS'];
+  const batRows = batting.map(b => [
+    b.last_name, b.first_name, b.class_year || '',
+    b.gp, b.pa, b.ab, b.h, b['2b'], b['3b'], b.hr, b.tb,
+    b.r, b.rbi, b.bb, b.hbp, b.so, b.sf, b.sh, b.sb, b.cs, b.errors,
+    b.avg, b.obp, b.slg, b.ops
+  ]);
+
+  // Pitching CSV
+  const pitHeaders = ['Last','First','Class','GP','GS','IP','W','L','SV','H','R','ER','BB','SO','HR','HBP','ERA','WHIP','BAA'];
+  const pitRows = pitching.map(p => [
+    p.last_name, p.first_name, p.class_year || '',
+    p.gp, p.gs, p.ip_whole + '.' + p.ip_remainder,
+    p.w, p.l, p.sv, p.h, p.r, p.er, p.bb, p.so, p.hr_allowed, p.hbp,
+    p.era, p.whip, p.baa
+  ]);
+
+  function toCsv(headers, rows) {
+    const escape = v => {
+      const s = String(v == null ? '' : v);
+      return s.includes(',') || s.includes('"') ? '"' + s.replace(/"/g, '""') + '"' : s;
+    };
+    return [headers.map(escape).join(','), ...rows.map(r => r.map(escape).join(','))].join('\n');
+  }
+
+  const csv = '--- BATTING ---\n' + toCsv(batHeaders, batRows) +
+    '\n\n--- PITCHING ---\n' + toCsv(pitHeaders, pitRows);
+
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', `attachment; filename="moeller_stats_${season}_${date}.csv"`);
+  res.send(csv);
 });
 
 // SSE endpoint
