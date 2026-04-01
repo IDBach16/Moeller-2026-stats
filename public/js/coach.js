@@ -311,13 +311,9 @@
     if (loaded[season]) return;
     loaded[season] = true;
 
-    if (season === 'total') loadAggregateTab('tab-total', 'total');
-    else if (season === 'regular') loadAggregateTab('tab-regular', 'regular');
-    else if (season === 'postseason') loadAggregateTab('tab-postseason', 'postseason');
+    if (season === 'gcl-season') loadGclSeasonTab();
+    else if (season === 'gcl-games') loadGclGamesTab();
     else if (season === 'exhibition') loadAggregateTab('tab-exhibition', 'exhibition');
-    else if (season === 'game-regular') loadGameTab('tab-games', 'regular', 'regularGamesAccordion');
-    else if (season === 'game-postseason') loadGameTab('tab-postgames', 'postseason', 'postGamesAccordion');
-    else if (season === 'gcl') loadGclTab();
   }
 
   const GCL_BAT_COLS = [
@@ -382,32 +378,42 @@
     { key: 'era', label: 'ERA', type: 'era' }
   ];
 
-  async function loadGclTab() {
-    const pane = document.getElementById('tab-gcl');
+  async function loadGclSeasonTab() {
+    const pane = document.getElementById('tab-gcl-season');
     if (!pane) return;
     try {
-      const [batData, pitData, games] = await Promise.all([
+      const [batData, pitData] = await Promise.all([
         fetch('/api/gcl/batting').then(r => r.json()),
-        fetch('/api/gcl/pitching').then(r => r.json()),
-        fetch('/api/gcl/games').then(r => r.json())
+        fetch('/api/gcl/pitching').then(r => r.json())
       ]);
 
-      // Batting table
       const batTable = document.getElementById('gclBattingTable');
       buildTableHeader(GCL_BAT_COLS, batTable.querySelector('thead'));
       buildTableBody(batData.rows, GCL_BAT_COLS, batTable.querySelector('tbody'));
       if (batData.totals) buildTableFooter(batData.totals, GCL_BAT_COLS, batTable.querySelector('tfoot'));
 
-      // Pitching table
       const pitTable = document.getElementById('gclPitchingTable');
       buildTableHeader(GCL_PIT_COLS, pitTable.querySelector('thead'));
       buildTableBody(pitData.rows, GCL_PIT_COLS, pitTable.querySelector('tbody'));
       if (pitData.totals) buildTableFooter(pitData.totals, GCL_PIT_COLS, pitTable.querySelector('tfoot'));
 
-      // Game results accordion
+      pane.querySelector('.stat-loading').style.display = 'none';
+      pane.querySelector('.stat-content').style.display = '';
+    } catch (err) {
+      console.error('GCL season load failed:', err);
+      pane.querySelector('.stat-loading').innerHTML = '<div class="text-danger">Failed to load GCL data</div>';
+    }
+  }
+
+  async function loadGclGamesTab() {
+    const pane = document.getElementById('tab-gcl-games');
+    if (!pane) return;
+    try {
+      const games = await fetch('/api/gcl/games').then(r => r.json());
       const accordion = document.getElementById('gclGamesAccordion');
       accordion.innerHTML = '';
       const completedGames = games.filter(g => g.gcl_game_id && g.result);
+
       for (const game of completedGames) {
         const detail = await fetch('/api/gcl/games/' + game.gcl_game_id).then(r => r.json());
         const resultBadge = game.result === 'W' ? 'bg-success' : game.result === 'L' ? 'bg-danger' : 'bg-secondary';
@@ -448,29 +454,36 @@
         buildTableBody(detail.pitching, GCL_GAME_PIT_COLS, gamePitTable.querySelector('tbody'));
       }
 
+      if (!completedGames.length) {
+        accordion.innerHTML = '<div class="text-center text-muted py-4">No completed games with boxscores yet</div>';
+      }
+
       pane.querySelector('.stat-loading').style.display = 'none';
       pane.querySelector('.stat-content').style.display = '';
     } catch (err) {
-      console.error('GCL load failed:', err);
-      pane.querySelector('.stat-loading').innerHTML = '<div class="text-danger">Failed to load GCL data</div>';
+      console.error('GCL games load failed:', err);
+      pane.querySelector('.stat-loading').innerHTML = '<div class="text-danger">Failed to load game data</div>';
     }
   }
 
-  // GCL refresh button
-  document.getElementById('gclRefreshBtn')?.addEventListener('click', async () => {
-    const btn = document.getElementById('gclRefreshBtn');
+  // GCL refresh buttons
+  async function doGclRefresh(btn) {
     btn.disabled = true;
     btn.textContent = 'Refreshing...';
     try {
       await fetch('/api/gcl/refresh', { method: 'POST' });
-      loaded['gcl'] = false;
-      loadGclTab();
+      loaded['gcl-season'] = false;
+      loaded['gcl-games'] = false;
+      const activeTab = document.querySelector('#statTabs .nav-link.active');
+      if (activeTab) loadTab(activeTab.dataset.season);
     } catch (err) {
       alert('Refresh failed: ' + err.message);
     }
     btn.disabled = false;
     btn.textContent = 'Refresh from GCL';
-  });
+  }
+  document.getElementById('gclRefreshBtn')?.addEventListener('click', () => doGclRefresh(document.getElementById('gclRefreshBtn')));
+  document.getElementById('gclRefreshBtn2')?.addEventListener('click', () => doGclRefresh(document.getElementById('gclRefreshBtn2')));
 
   // Tab switching
   document.querySelectorAll('#statTabs .nav-link').forEach(tab => {
@@ -480,7 +493,7 @@
   });
 
   // Load initial tab
-  loadTab('total');
+  loadTab('gcl-season');
 
   // SSE for real-time updates
   function connectSSE() {

@@ -13,75 +13,49 @@
 </div>
 
 <ul class="nav nav-tabs" id="statTabs" role="tablist">
-  <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-total" data-season="total">Total</a></li>
-  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-regular" data-season="regular">Regular Season</a></li>
-  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-postseason" data-season="postseason">Postseason</a></li>
+  <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-gcl-season" data-season="gcl-season">Season Stats</a></li>
+  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-gcl-games" data-season="gcl-games">Game Stats</a></li>
   <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-exhibition" data-season="exhibition">Exhibition</a></li>
-  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-games" data-season="game-regular">Game Stats</a></li>
-  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-postgames" data-season="game-postseason">POST Game Stats</a></li>
-  <li class="nav-item"><a class="nav-link text-success fw-bold" data-bs-toggle="tab" href="#tab-gcl" data-season="gcl">GCL Stats</a></li>
 </ul>
 
 <div class="tab-content mt-3" id="statTabContent">
   <!-- Total / Regular / Postseason tabs share same structure -->
-  <div class="tab-pane fade show active" id="tab-total">
+  <!-- GCL Season Stats Tab -->
+  <div class="tab-pane fade show active" id="tab-gcl-season">
     <div class="stat-loading text-center py-4"><div class="spinner-border text-secondary"></div></div>
     <div class="stat-content" style="display:none">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <small class="text-muted">Data from <a href="https://gcls.gclsports.com/bsTeamStats.aspx?sat=21&schoolid=17&year=2025" target="_blank">GCL Sports</a></small>
+        <button class="btn btn-sm btn-outline-success" id="gclRefreshBtn">Refresh from GCL</button>
+      </div>
       <h5>Batting</h5>
-      <div class="table-responsive stat-table-wrap">
-        <table class="table table-sm table-striped table-hover stat-table batting-table" data-sort-default="avg">
-          <thead class="table-dark sticky-top"></thead>
-          <tbody></tbody>
-          <tfoot class="table-secondary"></tfoot>
+      <div class="table-responsive">
+        <table class="table table-sm table-striped table-hover" id="gclBattingTable">
+          <thead class="table-dark"></thead><tbody></tbody><tfoot class="table-secondary"></tfoot>
         </table>
       </div>
       <h5 class="mt-4">Pitching</h5>
-      <div class="table-responsive stat-table-wrap">
-        <table class="table table-sm table-striped table-hover stat-table pitching-table" data-sort-default="era">
-          <thead class="table-dark sticky-top"></thead>
-          <tbody></tbody>
-          <tfoot class="table-secondary"></tfoot>
+      <div class="table-responsive">
+        <table class="table table-sm table-striped table-hover" id="gclPitchingTable">
+          <thead class="table-dark"></thead><tbody></tbody><tfoot class="table-secondary"></tfoot>
         </table>
       </div>
     </div>
   </div>
 
-  <div class="tab-pane fade" id="tab-regular">
+  <!-- GCL Game Stats Tab -->
+  <div class="tab-pane fade" id="tab-gcl-games">
     <div class="stat-loading text-center py-4"><div class="spinner-border text-secondary"></div></div>
     <div class="stat-content" style="display:none">
-      <h5>Batting</h5>
-      <div class="table-responsive stat-table-wrap">
-        <table class="table table-sm table-striped table-hover stat-table batting-table" data-sort-default="avg">
-          <thead class="table-dark sticky-top"></thead><tbody></tbody><tfoot class="table-secondary"></tfoot>
-        </table>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <small class="text-muted">Individual game boxscores from GCL</small>
+        <button class="btn btn-sm btn-outline-success" id="gclRefreshBtn2">Refresh from GCL</button>
       </div>
-      <h5 class="mt-4">Pitching</h5>
-      <div class="table-responsive stat-table-wrap">
-        <table class="table table-sm table-striped table-hover stat-table pitching-table" data-sort-default="era">
-          <thead class="table-dark sticky-top"></thead><tbody></tbody><tfoot class="table-secondary"></tfoot>
-        </table>
-      </div>
+      <div class="accordion" id="gclGamesAccordion"></div>
     </div>
   </div>
 
-  <div class="tab-pane fade" id="tab-postseason">
-    <div class="stat-loading text-center py-4"><div class="spinner-border text-secondary"></div></div>
-    <div class="stat-content" style="display:none">
-      <h5>Batting</h5>
-      <div class="table-responsive stat-table-wrap">
-        <table class="table table-sm table-striped table-hover stat-table batting-table" data-sort-default="avg">
-          <thead class="table-dark sticky-top"></thead><tbody></tbody><tfoot class="table-secondary"></tfoot>
-        </table>
-      </div>
-      <h5 class="mt-4">Pitching</h5>
-      <div class="table-responsive stat-table-wrap">
-        <table class="table table-sm table-striped table-hover stat-table pitching-table" data-sort-default="era">
-          <thead class="table-dark sticky-top"></thead><tbody></tbody><tfoot class="table-secondary"></tfoot>
-        </table>
-      </div>
-    </div>
-  </div>
-
+  <!-- Exhibition Tab (manual entry) -->
   <div class="tab-pane fade" id="tab-exhibition">
     <div class="stat-loading text-center py-4"><div class="spinner-border text-secondary"></div></div>
     <div class="stat-content" style="display:none">
@@ -97,47 +71,6 @@
           <thead class="table-dark sticky-top"></thead><tbody></tbody><tfoot class="table-secondary"></tfoot>
         </table>
       </div>
-    </div>
-  </div>
-
-  <!-- Game Stats accordion -->
-  <div class="tab-pane fade" id="tab-games">
-    <div class="stat-loading text-center py-4"><div class="spinner-border text-secondary"></div></div>
-    <div class="stat-content" style="display:none">
-      <div class="accordion" id="regularGamesAccordion"></div>
-    </div>
-  </div>
-
-  <div class="tab-pane fade" id="tab-postgames">
-    <div class="stat-loading text-center py-4"><div class="spinner-border text-secondary"></div></div>
-    <div class="stat-content" style="display:none">
-      <div class="accordion" id="postGamesAccordion"></div>
-    </div>
-  </div>
-</div>
-
-  <!-- GCL Stats Tab -->
-  <div class="tab-pane fade" id="tab-gcl">
-    <div class="stat-loading text-center py-4"><div class="spinner-border text-secondary"></div></div>
-    <div class="stat-content" style="display:none">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <small class="text-muted">Data scraped from <a href="https://gcls.gclsports.com/bsTeamStats.aspx?sat=21&schoolid=17&year=2025" target="_blank">GCL Sports</a></small>
-        <button class="btn btn-sm btn-outline-success" id="gclRefreshBtn">Refresh from GCL</button>
-      </div>
-      <h6>Batting</h6>
-      <div class="table-responsive">
-        <table class="table table-sm table-striped table-hover" id="gclBattingTable">
-          <thead class="table-dark"></thead><tbody></tbody><tfoot class="table-secondary"></tfoot>
-        </table>
-      </div>
-      <h6 class="mt-3">Pitching</h6>
-      <div class="table-responsive">
-        <table class="table table-sm table-striped table-hover" id="gclPitchingTable">
-          <thead class="table-dark"></thead><tbody></tbody><tfoot class="table-secondary"></tfoot>
-        </table>
-      </div>
-      <h6 class="mt-4">Game Results</h6>
-      <div class="accordion" id="gclGamesAccordion"></div>
     </div>
   </div>
 </div>
