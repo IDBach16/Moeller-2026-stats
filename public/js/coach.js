@@ -370,6 +370,75 @@
   const EDIT_PIT_FIELDS = ['ip_full','ip_partial','h','r','er','bb','so','hr','hbp'];
   const EDIT_PIT_CHECKS = ['gs','w','l','sv','cg','sho'];
 
+  let editAllPlayers = [];
+
+  function addEditBatterRow(player) {
+    const batBody = document.querySelector('#editBattingTable tbody');
+    const tr = document.createElement('tr');
+    tr.dataset.playerId = player.id;
+    tr.innerHTML = `<td class="text-nowrap fw-bold">${player.last_name}, ${player.first_name}</td>` +
+      EDIT_BAT_FIELDS.map(f => `<td><input type="number" min="0" max="99" value="0" class="form-control form-control-sm" data-field="${f}" style="width:55px"></td>`).join('');
+    batBody.appendChild(tr);
+  }
+
+  function addEditPitcherRow(player) {
+    const pitBody = document.querySelector('#editPitchingTable tbody');
+    const tr = document.createElement('tr');
+    tr.dataset.playerId = player.id;
+    let html = `<td class="text-nowrap fw-bold">${player.last_name}, ${player.first_name}</td>`;
+    EDIT_PIT_FIELDS.forEach(f => {
+      if (f === 'ip_partial') {
+        html += `<td><select class="form-select form-select-sm" data-field="${f}" style="width:55px">
+          <option value="0">0</option><option value="1">1</option><option value="2">2</option>
+        </select></td>`;
+      } else {
+        html += `<td><input type="number" min="0" max="99" value="0" class="form-control form-control-sm" data-field="${f}" style="width:55px"></td>`;
+      }
+    });
+    EDIT_PIT_CHECKS.forEach(f => {
+      html += `<td><input type="checkbox" class="form-check-input" data-field="${f}"></td>`;
+    });
+    tr.innerHTML = html;
+    pitBody.appendChild(tr);
+  }
+
+  function populatePlayerDropdowns(existingBatIds, existingPitIds) {
+    const batSelect = document.getElementById('addBatterSelect');
+    const pitSelect = document.getElementById('addPitcherSelect');
+    batSelect.innerHTML = '<option value="">Add player...</option>';
+    pitSelect.innerHTML = '<option value="">Add player...</option>';
+    editAllPlayers.forEach(p => {
+      if (!existingBatIds.includes(p.id)) {
+        batSelect.innerHTML += `<option value="${p.id}">${p.last_name}, ${p.first_name}</option>`;
+      }
+      if (!existingPitIds.includes(p.id)) {
+        pitSelect.innerHTML += `<option value="${p.id}">${p.last_name}, ${p.first_name}</option>`;
+      }
+    });
+  }
+
+  document.getElementById('addBatterBtn').addEventListener('click', () => {
+    const sel = document.getElementById('addBatterSelect');
+    const pid = parseInt(sel.value);
+    if (!pid) return;
+    const player = editAllPlayers.find(p => p.id === pid);
+    if (!player) return;
+    addEditBatterRow(player);
+    sel.querySelector(`option[value="${pid}"]`).remove();
+    sel.value = '';
+  });
+
+  document.getElementById('addPitcherBtn').addEventListener('click', () => {
+    const sel = document.getElementById('addPitcherSelect');
+    const pid = parseInt(sel.value);
+    if (!pid) return;
+    const player = editAllPlayers.find(p => p.id === pid);
+    if (!player) return;
+    addEditPitcherRow(player);
+    sel.querySelector(`option[value="${pid}"]`).remove();
+    sel.value = '';
+  });
+
   document.addEventListener('click', async e => {
     const editBtn = e.target.closest('.edit-game-btn');
     if (!editBtn) return;
@@ -378,7 +447,11 @@
     editBtn.disabled = true;
     editBtn.textContent = 'Loading...';
     try {
-      const detail = await fetch('/api/games/' + gameId).then(r => r.json());
+      const [detail, players] = await Promise.all([
+        fetch('/api/games/' + gameId).then(r => r.json()),
+        fetch('/api/players').then(r => r.json())
+      ]);
+      editAllPlayers = players;
       document.getElementById('editGameId').value = gameId;
       document.getElementById('editGameTitle').textContent = `#${detail.game.game_number}${detail.game.opponent ? ' — ' + detail.game.opponent : ''}`;
       document.getElementById('editSeasonType').value = detail.game.season_type;
@@ -428,6 +501,11 @@
         tr.innerHTML = html;
         pitBody.appendChild(tr);
       });
+
+      // Populate add-player dropdowns with players not already in the game
+      const existingBatIds = detail.batting.map(b => b.player_id);
+      const existingPitIds = detail.pitching.map(p => p.player_id);
+      populatePlayerDropdowns(existingBatIds, existingPitIds);
 
       new bootstrap.Modal(document.getElementById('editGameModal')).show();
     } catch (err) {
