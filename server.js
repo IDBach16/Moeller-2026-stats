@@ -38,6 +38,26 @@ app.use('/', pagesRouter);
 // Initialize database on startup
 require('./lib/db').getDb();
 
+// Initialize GCL schema and scrape on startup if stale
+const gclDb = require('./lib/gcl-db');
+const { scrapeAll } = require('./lib/gcl-scraper');
+gclDb.initGclSchema();
+
+(async () => {
+  if (gclDb.needsRefresh(6)) {
+    console.log('GCL data is stale, scraping...');
+    try {
+      const data = await scrapeAll(2026);
+      gclDb.seedGclData(data);
+      console.log('GCL data refreshed on startup');
+    } catch (err) {
+      console.error('GCL startup scrape failed:', err.message);
+    }
+  } else {
+    console.log('GCL data is fresh, skipping scrape');
+  }
+})();
+
 app.listen(PORT, () => {
   console.log(`Moeller Stats running at http://localhost:${PORT}`);
 });

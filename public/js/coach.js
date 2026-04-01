@@ -317,7 +317,160 @@
     else if (season === 'exhibition') loadAggregateTab('tab-exhibition', 'exhibition');
     else if (season === 'game-regular') loadGameTab('tab-games', 'regular', 'regularGamesAccordion');
     else if (season === 'game-postseason') loadGameTab('tab-postgames', 'postseason', 'postGamesAccordion');
+    else if (season === 'gcl') loadGclTab();
   }
+
+  const GCL_BAT_COLS = [
+    { key: 'player', label: 'Player', type: 'text' },
+    { key: 'class_year', label: 'Yr', type: 'text' },
+    { key: 'g', label: 'G', type: 'int' },
+    { key: 'ab', label: 'AB', type: 'int' },
+    { key: 'runs', label: 'R', type: 'int' },
+    { key: 'hits', label: 'H', type: 'int' },
+    { key: 'doubles', label: '2B', type: 'int' },
+    { key: 'triples', label: '3B', type: 'int' },
+    { key: 'hr', label: 'HR', type: 'int' },
+    { key: 'rbi', label: 'RBI', type: 'int' },
+    { key: 'sb', label: 'SB', type: 'int' },
+    { key: 'obp', label: 'OBP', type: 'avg' },
+    { key: 'avg', label: 'AVG', type: 'avg' }
+  ];
+
+  const GCL_PIT_COLS = [
+    { key: 'player', label: 'Player', type: 'text' },
+    { key: 'class_year', label: 'Yr', type: 'text' },
+    { key: 'g', label: 'G', type: 'int' },
+    { key: 'ip', label: 'IP', type: 'text' },
+    { key: 'w', label: 'W', type: 'int' },
+    { key: 'l', label: 'L', type: 'int' },
+    { key: 'sv', label: 'SV', type: 'int' },
+    { key: 'k', label: 'K', type: 'int' },
+    { key: 'sho', label: 'SHO', type: 'int' },
+    { key: 'whip', label: 'WHIP', type: 'era' },
+    { key: 'era', label: 'ERA', type: 'era' }
+  ];
+
+  const GCL_GAME_BAT_COLS = [
+    { key: 'player', label: 'Player', type: 'text' },
+    { key: 'ab', label: 'AB', type: 'int' },
+    { key: 'r', label: 'R', type: 'int' },
+    { key: 'h', label: 'H', type: 'int' },
+    { key: 'rbi', label: 'RBI', type: 'int' },
+    { key: 'doubles', label: '2B', type: 'int' },
+    { key: 'triples', label: '3B', type: 'int' },
+    { key: 'hr', label: 'HR', type: 'int' },
+    { key: 'bb', label: 'BB', type: 'int' },
+    { key: 'so', label: 'SO', type: 'int' },
+    { key: 'sf', label: 'SF', type: 'int' },
+    { key: 'sh', label: 'SH', type: 'int' },
+    { key: 'hbp', label: 'HBP', type: 'int' },
+    { key: 'sb', label: 'SB', type: 'int' },
+    { key: 'avg', label: 'AVG', type: 'avg' },
+    { key: 'obp', label: 'OBP', type: 'avg' },
+    { key: 'slg', label: 'SLG', type: 'avg' }
+  ];
+
+  const GCL_GAME_PIT_COLS = [
+    { key: 'player', label: 'Player', type: 'text' },
+    { key: 'ip', label: 'IP', type: 'text' },
+    { key: 'h', label: 'H', type: 'int' },
+    { key: 'r', label: 'R', type: 'int' },
+    { key: 'er', label: 'ER', type: 'int' },
+    { key: 'bb', label: 'BB', type: 'int' },
+    { key: 'so', label: 'SO', type: 'int' },
+    { key: 'hr', label: 'HR', type: 'int' },
+    { key: 'era', label: 'ERA', type: 'era' }
+  ];
+
+  async function loadGclTab() {
+    const pane = document.getElementById('tab-gcl');
+    if (!pane) return;
+    try {
+      const [batData, pitData, games] = await Promise.all([
+        fetch('/api/gcl/batting').then(r => r.json()),
+        fetch('/api/gcl/pitching').then(r => r.json()),
+        fetch('/api/gcl/games').then(r => r.json())
+      ]);
+
+      // Batting table
+      const batTable = document.getElementById('gclBattingTable');
+      buildTableHeader(GCL_BAT_COLS, batTable.querySelector('thead'));
+      buildTableBody(batData.rows, GCL_BAT_COLS, batTable.querySelector('tbody'));
+      if (batData.totals) buildTableFooter(batData.totals, GCL_BAT_COLS, batTable.querySelector('tfoot'));
+
+      // Pitching table
+      const pitTable = document.getElementById('gclPitchingTable');
+      buildTableHeader(GCL_PIT_COLS, pitTable.querySelector('thead'));
+      buildTableBody(pitData.rows, GCL_PIT_COLS, pitTable.querySelector('tbody'));
+      if (pitData.totals) buildTableFooter(pitData.totals, GCL_PIT_COLS, pitTable.querySelector('tfoot'));
+
+      // Game results accordion
+      const accordion = document.getElementById('gclGamesAccordion');
+      accordion.innerHTML = '';
+      const completedGames = games.filter(g => g.gcl_game_id && g.result);
+      for (const game of completedGames) {
+        const detail = await fetch('/api/gcl/games/' + game.gcl_game_id).then(r => r.json());
+        const resultBadge = game.result === 'W' ? 'bg-success' : game.result === 'L' ? 'bg-danger' : 'bg-secondary';
+        const item = document.createElement('div');
+        item.className = 'accordion-item';
+        item.innerHTML = `
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#gcl-game-${game.gcl_game_id}">
+              ${game.date || ''} — ${game.home_away === 'away' ? '@' : 'vs'} ${game.opponent}
+              <span class="badge ${resultBadge} ms-2">${game.score || game.result}</span>
+            </button>
+          </h2>
+          <div id="gcl-game-${game.gcl_game_id}" class="accordion-collapse collapse" data-bs-parent="#gclGamesAccordion">
+            <div class="accordion-body p-2">
+              ${game.home_r !== null ? `<div class="mb-2"><strong>Score:</strong> ${game.away_team || 'Away'} ${game.away_r} — ${game.home_team || 'Home'} ${game.home_r}</div>` : ''}
+              <h6>Hitting</h6>
+              <div class="table-responsive">
+                <table class="table table-sm table-striped gcl-bat-${game.gcl_game_id}">
+                  <thead class="table-dark"></thead><tbody></tbody>
+                </table>
+              </div>
+              <h6 class="mt-2">Pitching</h6>
+              <div class="table-responsive">
+                <table class="table table-sm table-striped gcl-pit-${game.gcl_game_id}">
+                  <thead class="table-dark"></thead><tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        `;
+        accordion.appendChild(item);
+
+        const gameBatTable = item.querySelector('.gcl-bat-' + game.gcl_game_id);
+        const gamePitTable = item.querySelector('.gcl-pit-' + game.gcl_game_id);
+        buildTableHeader(GCL_GAME_BAT_COLS, gameBatTable.querySelector('thead'));
+        buildTableBody(detail.batting, GCL_GAME_BAT_COLS, gameBatTable.querySelector('tbody'));
+        buildTableHeader(GCL_GAME_PIT_COLS, gamePitTable.querySelector('thead'));
+        buildTableBody(detail.pitching, GCL_GAME_PIT_COLS, gamePitTable.querySelector('tbody'));
+      }
+
+      pane.querySelector('.stat-loading').style.display = 'none';
+      pane.querySelector('.stat-content').style.display = '';
+    } catch (err) {
+      console.error('GCL load failed:', err);
+      pane.querySelector('.stat-loading').innerHTML = '<div class="text-danger">Failed to load GCL data</div>';
+    }
+  }
+
+  // GCL refresh button
+  document.getElementById('gclRefreshBtn')?.addEventListener('click', async () => {
+    const btn = document.getElementById('gclRefreshBtn');
+    btn.disabled = true;
+    btn.textContent = 'Refreshing...';
+    try {
+      await fetch('/api/gcl/refresh', { method: 'POST' });
+      loaded['gcl'] = false;
+      loadGclTab();
+    } catch (err) {
+      alert('Refresh failed: ' + err.message);
+    }
+    btn.disabled = false;
+    btn.textContent = 'Refresh from GCL';
+  });
 
   // Tab switching
   document.querySelectorAll('#statTabs .nav-link').forEach(tab => {

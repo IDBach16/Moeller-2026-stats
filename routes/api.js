@@ -4,6 +4,8 @@ const { getDb, DB_PATH } = require('../lib/db');
 const stats = require('../lib/stats');
 const { broadcast } = require('../lib/sse');
 const { addClient } = require('../lib/sse');
+const gclDb = require('../lib/gcl-db');
+const { scrapeAll } = require('../lib/gcl-scraper');
 
 // Database backup download (SQLite)
 router.get('/backup', (req, res) => {
@@ -317,6 +319,49 @@ router.put('/config', (req, res) => {
     db.prepare('INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)').run(key, String(value));
   }
   res.json({ success: true });
+});
+
+// ===================== GCL Scraped Stats =====================
+
+// GCL season batting
+router.get('/gcl/batting', (req, res) => {
+  const rows = gclDb.getGclBatting();
+  const totals = gclDb.getGclBattingTotals();
+  res.json({ rows, totals });
+});
+
+// GCL season pitching
+router.get('/gcl/pitching', (req, res) => {
+  const rows = gclDb.getGclPitching();
+  const totals = gclDb.getGclPitchingTotals();
+  res.json({ rows, totals });
+});
+
+// GCL games list
+router.get('/gcl/games', (req, res) => {
+  const games = gclDb.getGclGames();
+  res.json(games);
+});
+
+// GCL game detail
+router.get('/gcl/games/:id', (req, res) => {
+  const gclGameId = parseInt(req.params.id);
+  const batting = gclDb.getGclGameBatting(gclGameId);
+  const pitching = gclDb.getGclGamePitching(gclGameId);
+  const game = getDb().prepare('SELECT * FROM gcl_games WHERE gcl_game_id = ?').get(gclGameId);
+  res.json({ game, batting, pitching });
+});
+
+// Trigger GCL rescrape
+router.post('/gcl/refresh', async (req, res) => {
+  try {
+    const data = await scrapeAll(2026);
+    gclDb.seedGclData(data);
+    res.json({ success: true, games: data.schedule.length, boxscores: data.boxscores.length });
+  } catch (err) {
+    console.error('GCL refresh failed:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;

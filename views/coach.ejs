@@ -19,6 +19,7 @@
   <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-exhibition" data-season="exhibition">Exhibition</a></li>
   <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-games" data-season="game-regular">Game Stats</a></li>
   <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-postgames" data-season="game-postseason">POST Game Stats</a></li>
+  <li class="nav-item"><a class="nav-link text-success fw-bold" data-bs-toggle="tab" href="#tab-gcl" data-season="gcl">GCL Stats</a></li>
 </ul>
 
 <div class="tab-content mt-3" id="statTabContent">
@@ -111,6 +112,32 @@
     <div class="stat-loading text-center py-4"><div class="spinner-border text-secondary"></div></div>
     <div class="stat-content" style="display:none">
       <div class="accordion" id="postGamesAccordion"></div>
+    </div>
+  </div>
+</div>
+
+  <!-- GCL Stats Tab -->
+  <div class="tab-pane fade" id="tab-gcl">
+    <div class="stat-loading text-center py-4"><div class="spinner-border text-secondary"></div></div>
+    <div class="stat-content" style="display:none">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <small class="text-muted">Data scraped from <a href="https://gcls.gclsports.com/bsTeamStats.aspx?sat=21&schoolid=17&year=2025" target="_blank">GCL Sports</a></small>
+        <button class="btn btn-sm btn-outline-success" id="gclRefreshBtn">Refresh from GCL</button>
+      </div>
+      <h6>Batting</h6>
+      <div class="table-responsive">
+        <table class="table table-sm table-striped table-hover" id="gclBattingTable">
+          <thead class="table-dark"></thead><tbody></tbody><tfoot class="table-secondary"></tfoot>
+        </table>
+      </div>
+      <h6 class="mt-3">Pitching</h6>
+      <div class="table-responsive">
+        <table class="table table-sm table-striped table-hover" id="gclPitchingTable">
+          <thead class="table-dark"></thead><tbody></tbody><tfoot class="table-secondary"></tfoot>
+        </table>
+      </div>
+      <h6 class="mt-4">Game Results</h6>
+      <div class="accordion" id="gclGamesAccordion"></div>
     </div>
   </div>
 </div>
