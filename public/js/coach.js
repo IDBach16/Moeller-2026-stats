@@ -317,16 +317,34 @@
     { key: 'player', label: 'Player', type: 'text' },
     { key: 'class_year', label: 'Yr', type: 'text' },
     { key: 'g', label: 'G', type: 'int' },
+    { key: 'pa', label: 'PA', type: 'int' },
     { key: 'ab', label: 'AB', type: 'int' },
-    { key: 'runs', label: 'R', type: 'int' },
     { key: 'hits', label: 'H', type: 'int' },
     { key: 'doubles', label: '2B', type: 'int' },
     { key: 'triples', label: '3B', type: 'int' },
     { key: 'hr', label: 'HR', type: 'int' },
+    { key: 'tb', label: 'TB', type: 'int' },
+    { key: 'runs', label: 'R', type: 'int' },
     { key: 'rbi', label: 'RBI', type: 'int' },
+    { key: 'bb', label: 'BB', type: 'int' },
+    { key: 'so', label: 'SO', type: 'int' },
     { key: 'sb', label: 'SB', type: 'int' },
+    { key: 'avg', label: 'AVG', type: 'avg' },
     { key: 'obp', label: 'OBP', type: 'avg' },
-    { key: 'avg', label: 'AVG', type: 'avg' }
+    { key: 'slg', label: 'SLG', type: 'avg' },
+    { key: 'ops', label: 'OPS', type: 'avg' },
+    { key: 'rc', label: 'RC', type: 'era' },
+    { key: 'bbPct', label: 'BB%', type: 'avg' },
+    { key: 'kPct', label: 'K%', type: 'avg' },
+    { key: 'bbK', label: 'BB/K', type: 'era' },
+    { key: 'abHr', label: 'AB/HR', type: 'era' },
+    { key: 'woba', label: 'wOBA', type: 'avg' },
+    { key: 'cs', label: 'CS', type: 'int' },
+    { key: 'sbPct', label: 'SB%', type: 'avg' },
+    { key: 'errors', label: 'E', type: 'int' },
+    { key: 'babip', label: 'BABIP', type: 'avg' },
+    { key: 'iso', label: 'ISO', type: 'avg' },
+    { key: 'pwrSpd', label: 'PwrSpd', type: 'era' }
   ];
 
   const GCL_PIT_COLS = [
@@ -337,10 +355,20 @@
     { key: 'w', label: 'W', type: 'int' },
     { key: 'l', label: 'L', type: 'int' },
     { key: 'sv', label: 'SV', type: 'int' },
-    { key: 'k', label: 'K', type: 'int' },
+    { key: 'h', label: 'H', type: 'int' },
+    { key: 'bb', label: 'BB', type: 'int' },
+    { key: 'so', label: 'K', type: 'int' },
+    { key: 'hr', label: 'HR', type: 'int' },
     { key: 'sho', label: 'SHO', type: 'int' },
     { key: 'whip', label: 'WHIP', type: 'era' },
-    { key: 'era', label: 'ERA', type: 'era' }
+    { key: 'era', label: 'ERA', type: 'era' },
+    { key: 'h7', label: 'H/7', type: 'era' },
+    { key: 'bb7', label: 'BB/7', type: 'era' },
+    { key: 'k7', label: 'K/7', type: 'era' },
+    { key: 'k9', label: 'K/9', type: 'era' },
+    { key: 'hr7', label: 'HR/7', type: 'era' },
+    { key: 'bbK', label: 'BB/K', type: 'era' },
+    { key: 'errors', label: 'E', type: 'int' }
   ];
 
   const GCL_GAME_BAT_COLS = [
