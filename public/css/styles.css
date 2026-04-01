@@ -21,17 +21,60 @@
 }
 
 /* Stats tables */
-.stat-table {
+.stat-table,
+#gclBattingTable,
+#gclPitchingTable,
+[class*="gcl-bat-"],
+[class*="gcl-pit-"] {
   font-size: 0.82rem;
   white-space: nowrap;
+  border-collapse: collapse;
+}
+
+.stat-table th,
+#gclBattingTable th,
+#gclPitchingTable th,
+[class*="gcl-bat-"] th,
+[class*="gcl-pit-"] th {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  user-select: none;
+  position: relative;
+  padding: 6px 8px !important;
+  text-align: center;
+  vertical-align: middle;
+  border-bottom: 2px solid var(--moeller-gold) !important;
+}
+
+.stat-table td,
+#gclBattingTable td,
+#gclPitchingTable td,
+[class*="gcl-bat-"] td,
+[class*="gcl-pit-"] td {
+  padding: 4px 8px !important;
+  text-align: center;
+  vertical-align: middle;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Left-align player name columns */
+.stat-table th:first-child,
+.stat-table th:nth-child(2),
+.stat-table td:first-child,
+.stat-table td:nth-child(2),
+#gclBattingTable th:first-child,
+#gclBattingTable td:first-child,
+#gclPitchingTable th:first-child,
+#gclPitchingTable td:first-child,
+[class*="gcl-bat-"] th:first-child,
+[class*="gcl-bat-"] td:first-child,
+[class*="gcl-pit-"] th:first-child,
+[class*="gcl-pit-"] td:first-child {
+  text-align: left;
 }
 
 .stat-table th {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  user-select: none;
-  position: relative;
   padding-right: 14px !important;
 }
 

@@ -118,9 +118,7 @@
         let val = row[col.key];
         if (col.key === 'ip') val = formatIP(row);
         td.textContent = formatVal(val, col.type);
-        td.classList.add('text-nowrap');
         if (i < 2) td.classList.add('sticky-col');
-        if (col.type !== 'text') td.classList.add('text-end');
         tr.appendChild(td);
       });
       tbody.appendChild(tr);
@@ -133,7 +131,7 @@
     const tr = document.createElement('tr');
     cols.forEach((col, i) => {
       const td = document.createElement('td');
-      td.classList.add('fw-bold', 'text-nowrap');
+      td.classList.add('fw-bold');
       if (i === 0) { td.textContent = 'Totals'; }
       else if (i === 1) { td.textContent = ''; }
       else if (col.key === 'ip') { td.textContent = formatIP(totals); }
@@ -142,7 +140,6 @@
         td.textContent = val !== undefined ? formatVal(val, col.type) : '';
       }
       if (i < 2) td.classList.add('sticky-col');
-      if (col.type !== 'text') td.classList.add('text-end');
       tr.appendChild(td);
     });
     tfoot.appendChild(tr);
