@@ -74,6 +74,40 @@
   </div>
 </div>
 
+<!-- GCL Edit Game Modal -->
+<div class="modal fade" id="gclEditModal" tabindex="-1">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title">Edit Game <span id="gclEditTitle"></span></h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="gclEditGameId">
+        <h6>Batting</h6>
+        <div class="table-responsive">
+          <table class="table table-sm table-striped" id="gclEditBattingTable">
+            <thead class="table-dark"></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <h6 class="mt-3">Pitching</h6>
+        <div class="table-responsive">
+          <table class="table table-sm table-striped" id="gclEditPitchingTable">
+            <thead class="table-dark"></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div id="gclEditError" class="alert alert-danger mt-2" style="display:none"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="gclSaveEdit">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="sse-status" class="position-fixed bottom-0 end-0 m-3" style="display:none">
   <span class="badge bg-success">Live updates active</span>
 </div>

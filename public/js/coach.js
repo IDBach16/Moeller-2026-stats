@@ -453,7 +453,10 @@
           </h2>
           <div id="gcl-game-${game.gcl_game_id}" class="accordion-collapse collapse" data-bs-parent="#gclGamesAccordion">
             <div class="accordion-body p-2">
-              ${game.home_r !== null ? `<div class="mb-2"><strong>Score:</strong> ${game.away_team || 'Away'} ${game.away_r} — ${game.home_team || 'Home'} ${game.home_r}</div>` : ''}
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                ${game.home_r !== null ? `<div><strong>Score:</strong> ${game.away_team || 'Away'} ${game.away_r} — ${game.home_team || 'Home'} ${game.home_r}</div>` : '<div></div>'}
+                <button class="btn btn-sm btn-outline-primary gcl-edit-btn" data-gcl-game-id="${game.gcl_game_id}" data-opponent="${game.opponent || ''}">Edit Game</button>
+              </div>
               <h6>Hitting</h6>
               <div class="table-responsive">
                 <table class="table table-sm table-striped gcl-bat-${game.gcl_game_id}">
@@ -509,6 +512,116 @@
   }
   document.getElementById('gclRefreshBtn')?.addEventListener('click', () => doGclRefresh(document.getElementById('gclRefreshBtn')));
   document.getElementById('gclRefreshBtn2')?.addEventListener('click', () => doGclRefresh(document.getElementById('gclRefreshBtn2')));
+
+  // GCL game edit
+  const GCL_EDIT_BAT_FIELDS = ['ab','r','h','rbi','doubles','triples','hr','bb','so','sf','sh','hbp','sb'];
+  const GCL_EDIT_PIT_FIELDS = ['ip_full','ip_partial','h','r','er','bb','so','hr'];
+
+  document.addEventListener('click', async e => {
+    const btn = e.target.closest('.gcl-edit-btn');
+    if (!btn) return;
+    const gclGameId = btn.dataset.gclGameId;
+    btn.disabled = true;
+    btn.textContent = 'Loading...';
+    try {
+      const detail = await fetch('/api/gcl/games/' + gclGameId).then(r => r.json());
+      document.getElementById('gclEditGameId').value = gclGameId;
+      document.getElementById('gclEditTitle').textContent = btn.dataset.opponent ? ' — ' + btn.dataset.opponent : '';
+      document.getElementById('gclEditError').style.display = 'none';
+
+      // Build batting table
+      const batHead = document.querySelector('#gclEditBattingTable thead');
+      const batBody = document.querySelector('#gclEditBattingTable tbody');
+      batHead.innerHTML = '<tr><th>Player</th>' + GCL_EDIT_BAT_FIELDS.map(f => `<th>${f.toUpperCase()}</th>`).join('') + '</tr>';
+      batBody.innerHTML = '';
+      (detail.batting || []).forEach(b => {
+        const tr = document.createElement('tr');
+        tr.dataset.player = b.player;
+        tr.innerHTML = `<td class="text-nowrap fw-bold">${b.player}</td>` +
+          GCL_EDIT_BAT_FIELDS.map(f => `<td><input type="number" min="0" max="99" value="${b[f] || 0}" class="form-control form-control-sm" data-field="${f}" style="width:55px"></td>`).join('');
+        batBody.appendChild(tr);
+      });
+
+      // Build pitching table
+      const pitHead = document.querySelector('#gclEditPitchingTable thead');
+      const pitBody = document.querySelector('#gclEditPitchingTable tbody');
+      pitHead.innerHTML = '<tr><th>Player</th>' + GCL_EDIT_PIT_FIELDS.map(f => `<th>${f === 'ip_full' ? 'IP' : f === 'ip_partial' ? '.X' : f.toUpperCase()}</th>`).join('') + '</tr>';
+      pitBody.innerHTML = '';
+      (detail.pitching || []).forEach(p => {
+        const tr = document.createElement('tr');
+        tr.dataset.player = p.player;
+        let html = `<td class="text-nowrap fw-bold">${p.player}</td>`;
+        GCL_EDIT_PIT_FIELDS.forEach(f => {
+          if (f === 'ip_partial') {
+            html += `<td><select class="form-select form-select-sm" data-field="${f}" style="width:55px">
+              <option value="0" ${(p[f]||0)==0?'selected':''}>0</option>
+              <option value="1" ${(p[f]||0)==1?'selected':''}>1</option>
+              <option value="2" ${(p[f]||0)==2?'selected':''}>2</option>
+            </select></td>`;
+          } else {
+            html += `<td><input type="number" min="0" max="99" value="${p[f] || 0}" class="form-control form-control-sm" data-field="${f}" style="width:55px"></td>`;
+          }
+        });
+        tr.innerHTML = html;
+        pitBody.appendChild(tr);
+      });
+
+      new bootstrap.Modal(document.getElementById('gclEditModal')).show();
+    } catch (err) {
+      alert('Failed to load game: ' + err.message);
+    }
+    btn.disabled = false;
+    btn.textContent = 'Edit Game';
+  });
+
+  // Save GCL game edit
+  document.getElementById('gclSaveEdit')?.addEventListener('click', async () => {
+    const gclGameId = document.getElementById('gclEditGameId').value;
+    const saveBtn = document.getElementById('gclSaveEdit');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+
+    const batters = [];
+    document.querySelectorAll('#gclEditBattingTable tbody tr').forEach(tr => {
+      const entry = { player: tr.dataset.player };
+      tr.querySelectorAll('input').forEach(inp => {
+        entry[inp.dataset.field] = parseInt(inp.value) || 0;
+      });
+      batters.push(entry);
+    });
+
+    const pitchers = [];
+    document.querySelectorAll('#gclEditPitchingTable tbody tr').forEach(tr => {
+      const entry = { player: tr.dataset.player };
+      tr.querySelectorAll('input, select').forEach(inp => {
+        entry[inp.dataset.field] = parseInt(inp.value) || 0;
+      });
+      pitchers.push(entry);
+    });
+
+    try {
+      const res = await fetch('/api/gcl/games/' + gclGameId, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ batters, pitchers })
+      });
+      const data = await res.json();
+      if (data.success) {
+        bootstrap.Modal.getInstance(document.getElementById('gclEditModal')).hide();
+        loaded['gcl-games'] = false;
+        loaded['gcl-season'] = false;
+        loadGclGamesTab();
+      } else {
+        document.getElementById('gclEditError').textContent = data.error || 'Save failed';
+        document.getElementById('gclEditError').style.display = '';
+      }
+    } catch (err) {
+      document.getElementById('gclEditError').textContent = 'Network error: ' + err.message;
+      document.getElementById('gclEditError').style.display = '';
+    }
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save Changes';
+  });
 
   // Tab switching
   document.querySelectorAll('#statTabs .nav-link').forEach(tab => {

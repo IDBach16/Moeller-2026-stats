@@ -352,6 +352,53 @@ router.get('/gcl/games/:id', (req, res) => {
   res.json({ game, batting, pitching });
 });
 
+// Update GCL game boxscore
+router.put('/gcl/games/:id', (req, res) => {
+  const db = getDb();
+  const gclGameId = parseInt(req.params.id);
+  const { batters, pitchers } = req.body;
+
+  try {
+    const txn = db.transaction(() => {
+      if (batters) {
+        db.prepare('DELETE FROM gcl_game_batting WHERE gcl_game_id = ?').run(gclGameId);
+        const ins = db.prepare(`
+          INSERT INTO gcl_game_batting (gcl_game_id, player, ab, r, h, rbi, doubles, triples, hr, bb, so, sf, sh, hbp, sb)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        for (const b of batters) {
+          ins.run(gclGameId, b.player,
+            b.ab || 0, b.r || 0, b.h || 0, b.rbi || 0,
+            b.doubles || 0, b.triples || 0, b.hr || 0,
+            b.bb || 0, b.so || 0, b.sf || 0, b.sh || 0, b.hbp || 0, b.sb || 0
+          );
+        }
+      }
+      if (pitchers) {
+        db.prepare('DELETE FROM gcl_game_pitching WHERE gcl_game_id = ?').run(gclGameId);
+        const ins = db.prepare(`
+          INSERT INTO gcl_game_pitching (gcl_game_id, player, ip_full, ip_partial, ip, h, r, er, bb, so, hr)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        for (const p of pitchers) {
+          const ipFull = p.ip_full || 0;
+          const ipPartial = p.ip_partial || 0;
+          ins.run(gclGameId, p.player,
+            ipFull, ipPartial, ipFull + '.' + ipPartial,
+            p.h || 0, p.r || 0, p.er || 0,
+            p.bb || 0, p.so || 0, p.hr || 0
+          );
+        }
+      }
+    });
+    txn();
+    res.json({ success: true });
+  } catch (err) {
+    console.error('GCL game edit failed:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Trigger GCL rescrape
 router.post('/gcl/refresh', async (req, res) => {
   try {
