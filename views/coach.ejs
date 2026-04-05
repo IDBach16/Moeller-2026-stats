@@ -3,7 +3,19 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h4 class="mb-0">
     <%= config.season_year %> Moeller Crusaders
-    <small class="text-muted">Record: <%= config.wins %>-<%= config.losses %>-<%= config.ties %></small>
+    <small class="text-muted" id="record-display">
+      Record: <span id="record-text"><%= config.wins %>-<%= config.losses %>-<%= config.ties %></span>
+      <button class="btn btn-sm btn-outline-secondary ms-1 py-0 px-1" id="editRecordBtn" title="Edit Record" style="font-size:11px;">✏️</button>
+    </small>
+    <span id="record-edit" style="display:none;">
+      <input type="number" id="edit-wins" value="<%= config.wins %>" min="0" style="width:50px;" class="form-control form-control-sm d-inline-block">
+      -
+      <input type="number" id="edit-losses" value="<%= config.losses %>" min="0" style="width:50px;" class="form-control form-control-sm d-inline-block">
+      -
+      <input type="number" id="edit-ties" value="<%= config.ties %>" min="0" style="width:50px;" class="form-control form-control-sm d-inline-block">
+      <button class="btn btn-sm btn-success py-0 px-2 ms-1" id="saveRecordBtn">Save</button>
+      <button class="btn btn-sm btn-outline-secondary py-0 px-2" id="cancelRecordBtn">Cancel</button>
+    </span>
   </h4>
   <div>
     <a href="/coach/print" class="btn btn-sm btn-outline-secondary">Print Stats</a>
@@ -201,4 +213,32 @@
 </div>
 
 <script src="/js/coach.js"></script>
+<script>
+  document.getElementById('editRecordBtn').addEventListener('click', () => {
+    document.getElementById('record-display').style.display = 'none';
+    document.getElementById('record-edit').style.display = 'inline';
+  });
+  document.getElementById('cancelRecordBtn').addEventListener('click', () => {
+    document.getElementById('record-edit').style.display = 'none';
+    document.getElementById('record-display').style.display = '';
+  });
+  document.getElementById('saveRecordBtn').addEventListener('click', async () => {
+    const wins = document.getElementById('edit-wins').value;
+    const losses = document.getElementById('edit-losses').value;
+    const ties = document.getElementById('edit-ties').value;
+    const res = await fetch('/api/config', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ wins, losses, ties })
+    });
+    if (res.ok) {
+      document.getElementById('record-text').textContent = `${wins}-${losses}-${ties}`;
+      document.getElementById('edit-wins').value = wins;
+      document.getElementById('edit-losses').value = losses;
+      document.getElementById('edit-ties').value = ties;
+      document.getElementById('record-edit').style.display = 'none';
+      document.getElementById('record-display').style.display = '';
+    }
+  });
+</script>
 <%- include('partials/footer') %>
