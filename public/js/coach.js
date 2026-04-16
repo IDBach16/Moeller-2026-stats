@@ -151,7 +151,14 @@
   function sortTable(table, colKey, colType) {
     const tbody = table.querySelector('tbody');
     const rows = Array.from(tbody.querySelectorAll('tr'));
-    const cols = table.classList.contains('batting-table') ? BATTING_COLS : PITCHING_COLS;
+    const isGcl = table.classList.contains('gcl-table');
+    const isBat = table.classList.contains('batting-table');
+    let cols;
+    if (isGcl) {
+      cols = isBat ? GCL_BAT_COLS : GCL_PIT_COLS;
+    } else {
+      cols = isBat ? BATTING_COLS : PITCHING_COLS;
+    }
     const colIdx = cols.findIndex(c => c.key === colKey);
     if (colIdx < 0) return;
 
