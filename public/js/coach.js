@@ -364,7 +364,7 @@
     { key: 'sv', label: 'SV', type: 'int' },
     { key: 'h', label: 'H', type: 'int' },
     { key: 'bb', label: 'BB', type: 'int' },
-    { key: 'so', label: 'K', type: 'int' },
+    { key: 'k', label: 'K', type: 'int' },
     { key: 'hr', label: 'HR', type: 'int' },
     { key: 'sho', label: 'SHO', type: 'int' },
     { key: 'whip', label: 'WHIP', type: 'era' },
