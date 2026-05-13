@@ -317,8 +317,158 @@
 
     if (season === 'gcl-season') loadGclSeasonTab();
     else if (season === 'gcl-games') loadGclGamesTab();
+    else if (season === 'rivals') loadRivalsTab(currentRival);
     else if (season === 'exhibition') loadAggregateTab('tab-exhibition', 'exhibition');
   }
+
+  // ============= vs Rivals tab =============
+  let currentRival = '';
+
+  const RIVALS_BAT_COLS = [
+    { key: 'player', label: 'Player', type: 'text' },
+    { key: 'class_year', label: 'Yr', type: 'text' },
+    { key: 'g', label: 'G', type: 'int' },
+    { key: 'pa', label: 'PA', type: 'int' },
+    { key: 'ab', label: 'AB', type: 'int' },
+    { key: 'h', label: 'H', type: 'int' },
+    { key: 'doubles', label: '2B', type: 'int' },
+    { key: 'triples', label: '3B', type: 'int' },
+    { key: 'hr', label: 'HR', type: 'int' },
+    { key: 'tb', label: 'TB', type: 'int' },
+    { key: 'runs', label: 'R', type: 'int' },
+    { key: 'rbi', label: 'RBI', type: 'int' },
+    { key: 'bb', label: 'BB', type: 'int' },
+    { key: 'so', label: 'SO', type: 'int' },
+    { key: 'hbp', label: 'HBP', type: 'int' },
+    { key: 'sb', label: 'SB', type: 'int' },
+    { key: 'avg', label: 'AVG', type: 'avg' },
+    { key: 'obp', label: 'OBP', type: 'avg' },
+    { key: 'slg', label: 'SLG', type: 'avg' },
+    { key: 'ops', label: 'OPS', type: 'avg' },
+    { key: 'woba', label: 'wOBA', type: 'avg' }
+  ];
+
+  const RIVALS_PIT_COLS = [
+    { key: 'player', label: 'Player', type: 'text' },
+    { key: 'class_year', label: 'Yr', type: 'text' },
+    { key: 'g', label: 'G', type: 'int' },
+    { key: 'ip', label: 'IP', type: 'text' },
+    { key: 'h', label: 'H', type: 'int' },
+    { key: 'r', label: 'R', type: 'int' },
+    { key: 'er', label: 'ER', type: 'int' },
+    { key: 'bb', label: 'BB', type: 'int' },
+    { key: 'so', label: 'SO', type: 'int' },
+    { key: 'hr', label: 'HR', type: 'int' },
+    { key: 'era', label: 'ERA', type: 'era' },
+    { key: 'whip', label: 'WHIP', type: 'era' },
+    { key: 'k7', label: 'K/7', type: 'era' },
+    { key: 'bb7', label: 'BB/7', type: 'era' },
+    { key: 'h7', label: 'H/7', type: 'era' }
+  ];
+
+  function renderRivalsGames(games) {
+    const tbody = document.querySelector('#rivalsGamesTable tbody');
+    tbody.innerHTML = '';
+    games.forEach(g => {
+      const tr = document.createElement('tr');
+      const resBadge = g.result === 'W' ? 'bg-success'
+                      : g.result === 'L' ? 'bg-danger' : 'bg-secondary';
+      const us = g.home_away === 'home' ? `${g.home_r ?? '-'}-${g.home_h ?? '-'}-${g.home_e ?? '-'}` : `${g.away_r ?? '-'}-${g.away_h ?? '-'}-${g.away_e ?? '-'}`;
+      const them = g.home_away === 'home' ? `${g.away_r ?? '-'}-${g.away_h ?? '-'}-${g.away_e ?? '-'}` : `${g.home_r ?? '-'}-${g.home_h ?? '-'}-${g.home_e ?? '-'}`;
+      tr.innerHTML = `
+        <td class="text-nowrap">${g.date || ''}</td>
+        <td>${g.opponent || ''}</td>
+        <td>${g.home_away === 'away' ? '@' : 'vs'}</td>
+        <td><span class="badge ${resBadge}">${g.result || '-'}</span></td>
+        <td class="text-nowrap">${g.score || ''}</td>
+        <td class="text-nowrap"><strong>${us}</strong> / ${them}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderRivalsSummary(games, batting, pitching, rival) {
+    const wins = games.filter(g => g.result === 'W').length;
+    const losses = games.filter(g => g.result === 'L').length;
+    const ties = games.filter(g => g.result === 'T').length;
+    const recordParts = [`${wins}-${losses}`];
+    if (ties > 0) recordParts.push(`-${ties}`);
+    const label = rival ? `vs ${rival}` : 'vs All GCL';
+    const battingTeam = batting.totals || {};
+    const pitchingTeam = pitching.totals || {};
+    document.getElementById('rivalsSummary').innerHTML = `
+      <div class="row g-2">
+        <div class="col-md-4">
+          <div class="border rounded p-2 text-center">
+            <div class="small text-muted">${label} — Record</div>
+            <div class="fs-4 fw-bold">${recordParts.join('')} <small class="text-muted">(${games.length} G)</small></div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="border rounded p-2 text-center">
+            <div class="small text-muted">Team Slash</div>
+            <div class="fs-5 fw-bold">${formatVal(battingTeam.avg, 'avg')} / ${formatVal(battingTeam.obp, 'avg')} / ${formatVal(battingTeam.slg, 'avg')}</div>
+            <div class="small text-muted">OPS ${formatVal(battingTeam.ops, 'avg')}</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="border rounded p-2 text-center">
+            <div class="small text-muted">Team Pitching</div>
+            <div class="fs-5 fw-bold">${formatVal(pitchingTeam.era, 'era')} ERA, ${formatVal(pitchingTeam.whip, 'era')} WHIP</div>
+            <div class="small text-muted">${pitchingTeam.ip || '0.0'} IP, ${pitchingTeam.so || 0} K</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  async function loadRivalsTab(rival = '') {
+    currentRival = rival;
+    const pane = document.getElementById('tab-rivals');
+    if (!pane) return;
+    pane.querySelector('.stat-loading').style.display = '';
+    pane.querySelector('.stat-content').style.display = 'none';
+
+    try {
+      const qs = rival ? '?rival=' + encodeURIComponent(rival) : '';
+      const [batData, pitData, games] = await Promise.all([
+        fetch('/api/gcl/rivals/batting' + qs).then(r => r.json()),
+        fetch('/api/gcl/rivals/pitching' + qs).then(r => r.json()),
+        fetch('/api/gcl/rivals/games' + qs).then(r => r.json())
+      ]);
+
+      const batTable = document.getElementById('rivalsBattingTable');
+      buildTableHeader(RIVALS_BAT_COLS, batTable.querySelector('thead'));
+      buildTableBody(batData.rows, RIVALS_BAT_COLS, batTable.querySelector('tbody'));
+      if (batData.totals) buildTableFooter(batData.totals, RIVALS_BAT_COLS, batTable.querySelector('tfoot'));
+
+      const pitTable = document.getElementById('rivalsPitchingTable');
+      buildTableHeader(RIVALS_PIT_COLS, pitTable.querySelector('thead'));
+      buildTableBody(pitData.rows, RIVALS_PIT_COLS, pitTable.querySelector('tbody'));
+      if (pitData.totals) buildTableFooter(pitData.totals, RIVALS_PIT_COLS, pitTable.querySelector('tfoot'));
+
+      document.getElementById('rivalsBattingHeader').textContent = rival ? `vs ${rival}` : 'vs All GCL';
+      document.getElementById('rivalsPitchingHeader').textContent = rival ? `vs ${rival}` : 'vs All GCL';
+
+      renderRivalsSummary(games, batData, pitData, rival);
+      renderRivalsGames(games);
+
+      pane.querySelector('.stat-loading').style.display = 'none';
+      pane.querySelector('.stat-content').style.display = '';
+    } catch (err) {
+      console.error('Rivals load failed:', err);
+      pane.querySelector('.stat-loading').innerHTML = '<div class="text-danger">Failed to load rivals data</div>';
+    }
+  }
+
+  // Rival filter button group
+  document.querySelectorAll('#rivalFilter button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#rivalFilter button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      loadRivalsTab(btn.dataset.rival || '');
+    });
+  });
 
   const GCL_BAT_COLS = [
     { key: 'player', label: 'Player', type: 'text' },

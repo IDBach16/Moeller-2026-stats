@@ -27,6 +27,7 @@
 <ul class="nav nav-tabs" id="statTabs" role="tablist">
   <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-gcl-season" data-season="gcl-season">Season Stats</a></li>
   <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-gcl-games" data-season="gcl-games">Game Stats</a></li>
+  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-rivals" data-season="rivals">GCL Stats</a></li>
   <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-exhibition" data-season="exhibition">Exhibition</a></li>
 </ul>
 
@@ -63,6 +64,47 @@
         <button class="btn btn-sm btn-outline-success" id="gclRefreshBtn2">Refresh from GCL</button>
       </div>
       <div class="accordion" id="gclGamesAccordion"></div>
+    </div>
+  </div>
+
+  <!-- GCL Stats Tab (Elder / La Salle / St. Xavier) -->
+  <div class="tab-pane fade" id="tab-rivals">
+    <div class="stat-loading text-center py-4"><div class="spinner-border text-secondary"></div></div>
+    <div class="stat-content" style="display:none">
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <small class="text-muted">Stats compiled against Elder, La Salle, and St. Xavier</small>
+        <div class="btn-group btn-group-sm" role="group" id="rivalFilter">
+          <button type="button" class="btn btn-outline-primary active" data-rival="">All GCL</button>
+          <button type="button" class="btn btn-outline-primary" data-rival="Elder">Elder</button>
+          <button type="button" class="btn btn-outline-primary" data-rival="La Salle">La Salle</button>
+          <button type="button" class="btn btn-outline-primary" data-rival="St. Xavier">St. Xavier</button>
+        </div>
+      </div>
+      <div id="rivalsSummary" class="mb-3"></div>
+      <h5>Batting <small class="text-muted ms-2" id="rivalsBattingHeader"></small></h5>
+      <div class="table-responsive">
+        <table class="table table-sm table-striped table-hover stat-table batting-table" id="rivalsBattingTable" data-sort-default="avg">
+          <thead class="table-dark"></thead><tbody></tbody><tfoot class="table-secondary"></tfoot>
+        </table>
+      </div>
+      <h5 class="mt-4">Pitching <small class="text-muted ms-2" id="rivalsPitchingHeader"></small></h5>
+      <div class="table-responsive">
+        <table class="table table-sm table-striped table-hover stat-table pitching-table" id="rivalsPitchingTable" data-sort-default="era">
+          <thead class="table-dark"></thead><tbody></tbody><tfoot class="table-secondary"></tfoot>
+        </table>
+      </div>
+      <h5 class="mt-4">Games</h5>
+      <div class="table-responsive">
+        <table class="table table-sm table-striped table-hover" id="rivalsGamesTable">
+          <thead class="table-dark">
+            <tr>
+              <th>Date</th><th>Opponent</th><th>Home/Away</th>
+              <th>Result</th><th>Score</th><th>R-H-E (us / them)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
   </div>
 

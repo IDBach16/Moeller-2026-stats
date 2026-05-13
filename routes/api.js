@@ -399,6 +399,33 @@ router.put('/gcl/games/:id', (req, res) => {
   }
 });
 
+// ===================== GCL Rivals (Elder / La Salle / St. X) =====================
+
+router.get('/gcl/rivals/meta', (req, res) => {
+  res.json({ rivals: gclDb.RIVALS });
+});
+
+router.get('/gcl/rivals/batting', (req, res) => {
+  const rival = req.query.rival || null;
+  res.json({
+    rows: gclDb.getRivalsBatting(rival),
+    totals: gclDb.getRivalsBattingTotals(rival),
+  });
+});
+
+router.get('/gcl/rivals/pitching', (req, res) => {
+  const rival = req.query.rival || null;
+  res.json({
+    rows: gclDb.getRivalsPitching(rival),
+    totals: gclDb.getRivalsPitchingTotals(rival),
+  });
+});
+
+router.get('/gcl/rivals/games', (req, res) => {
+  const rival = req.query.rival || null;
+  res.json(gclDb.getRivalsGames(rival));
+});
+
 // Trigger GCL rescrape
 router.post('/gcl/refresh', async (req, res) => {
   try {
